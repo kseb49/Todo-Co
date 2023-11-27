@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use AppBundle\Entity\Task;
+use App\Entity\Task;
 use AppBundle\Form\TaskForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
