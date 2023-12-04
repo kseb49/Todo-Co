@@ -8,7 +8,11 @@
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <title>To Do List app</title>
+        <title>
+            {% block title %}
+                To Do List app
+            {% endblock  %}
+        </title>
 
         {# <!-- Bootstrap Core CSS -->
         <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
