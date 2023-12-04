@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserForm;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,10 +38,10 @@ class UserController extends AbstractController
             return $this->redirectToRoute('user_list');
         }
 
-        return $this->render('user/create.html.twig', ['form' => $form->createView()]);
+        return $this->render('user/create.html.twig', ['form' => $form]);
     }
 
-    #[Route('/{{id}}/edit', name:'user_edit')]
+    #[Route('/{id}/edit', name:'user_edit')]
     public function editAction(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
     {
         $form = $this->createForm(UserForm::class, $user);
