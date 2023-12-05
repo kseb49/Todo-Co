@@ -14,11 +14,14 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[Route('users')]
 class UserController extends AbstractController
 {
+
+
     #[Route('/list', name:'user_list')]
     public function listAction(UserRepository $users)
     {
         return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
     }
+
 
     #[Route('/create', name:'user_create')]
     public function createAction(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
@@ -41,6 +44,7 @@ class UserController extends AbstractController
         return $this->render('user/create.html.twig', ['form' => $form]);
     }
 
+
     #[Route('/{id}/edit', name:'user_edit')]
     public function editAction(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
     {
@@ -57,5 +61,12 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);
+
+    }
+
+    #[Route('/{id}/delete', name:'user_delete')]
+    public function deleteAction(Request $request)
+    {
+        
     }
 }
