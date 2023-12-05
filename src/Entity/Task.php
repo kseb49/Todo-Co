@@ -13,21 +13,33 @@ class Task
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private $id;
+    private ?int $id =null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private $createdAt;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(length: 50, type: Types::TEXT)]
     #[Assert\NotBlank(message:"Vous devez saisir un titre.")]
     #[Assert\NotNull]
     #[Assert\Type('string')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: '{{ value }} est trop court. Le titre de la tâche ne peut pas être infèrieur à {{ limit }} caractères',
+        maxMessage: '{{ value }} est trop long. Le titre de la tâche ne peut pas être supèrieur à {{ limit }} caractères'
+    )]
     private $title;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(length: 1000, type: Types::TEXT)]
     #[Assert\NotBlank(message:"Vous devez saisir du contenu.")]
     #[Assert\NotNull]
     #[Assert\Type('string')]
+    #[Assert\Length(
+        min: 5,
+        max: 1000,
+        minMessage: '{{ value }} est trop court. Le contenu de la tâche ne peut pas être infèrieur à {{ limit }} caractères',
+        maxMessage: '{{ value }} est trop long. Le contenu de la tâche ne peut pas être supèrieur à {{ limit }} caractères'
+    )]
     private $content;
 
     #[ORM\Column(type: Types::BOOLEAN)]
@@ -83,7 +95,7 @@ class Task
         return $this->isDone;
     }
 
-    public function toggle($flag)
+    public function toggle(bool $flag)
     {
         $this->isDone = $flag;
     }
