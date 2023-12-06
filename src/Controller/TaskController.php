@@ -76,7 +76,7 @@ class TaskController extends AbstractController
     public function deleteTaskAction(Task $task, EntityManagerInterface $em, Request $request)
     {
         if ($this->getUser() !== $task->getUser()) {
-            $this->addFlash('error', "Vous ne pouvez pas supprimer une tâche d'un autre utilisateur");
+            $this->addFlash('error', "Vous ne pouvez pas supprimer la tâche d'un autre utilisateur");
             return $this->redirectToRoute('task_list');
         }
 
