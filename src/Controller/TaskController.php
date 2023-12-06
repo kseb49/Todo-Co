@@ -8,6 +8,7 @@ use App\Form\TaskForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class TaskController extends AbstractController
@@ -75,7 +76,7 @@ class TaskController extends AbstractController
      * @Route("/tasks/{id}/delete", name="task_delete")
      */
     #[Route("/tasks/{id}/delete", name: "task_delete")]
-    public function deleteTaskAction(Task $task, EntityManagerInterface $em)
+    public function deleteTaskAction(Task $task, EntityManagerInterface $em) :RedirectResponse
     {
         $em->remove($task);
         $em->flush();
