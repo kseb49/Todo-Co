@@ -48,9 +48,7 @@ class TaskController extends AbstractController
 
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $em->flush();
-
             $this->addFlash('success', 'La tâche a bien été modifiée.');
-
             return $this->redirectToRoute('task_list');
         }
 
@@ -58,6 +56,7 @@ class TaskController extends AbstractController
             'form' => $form,
             'task' => $task,
         ]);
+
     }
 
 
@@ -66,11 +65,12 @@ class TaskController extends AbstractController
     {
         $task->toggle(!$task->isDone());
         $em->flush();
-
-        $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
-
+        $message = $task->isDone() === true ? "terminée" : "en cours";
+        $this->addFlash('success', sprintf('La tâche %s a bien été marquée %s.', $task->getTitle(), $message));
         return $this->redirectToRoute('task_list');
+
     }
+
 
     /**
      * @Route("/tasks/{id}/delete", name="task_delete")
