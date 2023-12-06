@@ -72,17 +72,24 @@ class TaskController extends AbstractController
     }
 
 
-    /**
-     * @Route("/tasks/{id}/delete", name="task_delete")
-     */
     #[Route("/tasks/{id}/delete", name: "task_delete")]
-    public function deleteTaskAction(Task $task, EntityManagerInterface $em)
+    public function deleteTaskAction(Task $task, EntityManagerInterface $em, Request $request)
     {
-        $em->remove($task);
-        $em->flush();
+        if ($this->getUser() !== $task->getUser()) {
+            $this->addFlash('error', "Vous ne pouvez pas supprimer une tâche d'un autre utilisateur");
+            return $this->redirectToRoute('task_list');
+        }
 
-        $this->addFlash('success', 'La tâche a bien été supprimée.');
-
+        $submittedToken = $request->request->get('token');
+        if ($this->isCsrfTokenValid('delete-task', $submittedToken)) {
+            $em->remove($task);
+            $em->flush();
+            $this->addFlash('success', 'La tâche a bien été supprimée.');
+            return $this->redirectToRoute('task_list');
+        }
+        $this->addFlash('error', "Vous n'êtes pas autorisé à supprimer cette tâche");
         return $this->redirectToRoute('task_list');
+
     }
+
 }
