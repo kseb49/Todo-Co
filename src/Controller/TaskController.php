@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Task;
+use App\Entity\User;
 use App\Repository\TaskRepository;
 use App\Form\TaskForm;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,9 +17,10 @@ class TaskController extends AbstractController
 
 
     #[Route("/tasks", name: "task_list")]
-    public function listAction(TaskRepository $task)
+    public function listAction(TaskRepository $task, UserRepository $users)
     {
-        return $this->render('task/list.html.twig', ['tasks' => $task->findAll()]);
+        return $this->render('task/list.html.twig', ['tasks' => $task->findBy(['user' => $this->getUser()], ['createdAt' => 'DESC'])]);
+
     }
 
 
