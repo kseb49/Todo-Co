@@ -28,17 +28,13 @@ class UserController extends AbstractController
     {
         $user = new User();
         $form = $this->createForm(UserForm::class, $user);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
             $em->persist($user);
             $em->flush();
-
             $this->addFlash('success', "L'utilisateur a bien été ajouté.");
-
-            return $this->redirectToRoute('user_list');
+            return $this->redirectToRoute('homepage');
         }
 
         return $this->render('user/create.html.twig', ['form' => $form]);
