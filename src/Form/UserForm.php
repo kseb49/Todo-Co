@@ -30,16 +30,16 @@ class UserForm extends AbstractType
                     'first_options'  => ['label' => 'Mot de passe'],
                     'second_options' => ['label' => 'Tapez le mot de passe à nouveau'],
                 ]
-                );
-            // ->add('roles', CheckboxType::class,
-            //     [
-            //         'label' => 'Rôle Administrateur ?',
-            //         'help' => 'Cocher la case pour accorder les droits administrateurs à cette utilisateur',
-            //         'required' => false,
-            //         'value' => true,
-            //         'mapped' => false,
-            //     ]
-            // );
+                )
+            ->add('roles', CheckboxType::class,
+                [
+                    'label' => 'Rôle Administrateur ?',
+                    'help' => 'Cocher la case pour accorder les droits administrateurs à cette utilisateur',
+                    'required' => false,
+                    'value' => false,
+                    'mapped' => false,
+                ]
+            );
 
     }
 

@@ -27,19 +27,20 @@ class UserController extends AbstractController
     #[Route('/create', name:'user_create')]
     public function createAction(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
     {
-        $isAdmin = in_array('ROLE_ADMIN', $this->getUser()->getRoles());
-        if ($this->getUser() &&  $isAdmin === false) {
+        if($this->getUser() && in_array('ROLE_ADMIN', $this->getUser()->getRoles()) === false) {
             $this->addFlash('error', "Vous avez déjà un compte.");
             return $this->redirectToRoute('homepage');
         }
 
         $user = new User();
-        $form = $this->createForm($isAdmin ? UserAdminForm::class : UserForm::class, $user);
+        $form = $this->createForm(UserForm::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
             if($form->get('roles')->getData() === true) {
-                $user->setRoles(['ROLE_ADMIN']);
+                if ($this->getUser() && in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+                    $user->setRoles(['ROLE_ADMIN']);
+                }
             }
             $em->persist($user);
             $em->flush();
