@@ -11,19 +11,19 @@
         </div>
     {% else %}
         <div class="row">
-            <table class="table">
-                <thead>
+            <table class="table table-hover">
+                <thead class="thead-dark">
                 <tr>
-                    <th>#</th>
-                    <th>Nom d'utilisateur</th>
-                    <th>Adresse d'utilisateur</th>
-                    <th>Actions</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Nom d'utilisateur</th>
+                    <th scope="col">Adresse d'utilisateur</th>
+                    <th scope="col">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for user in users %}
                     <tr>
-                        <th scope="row">{{ loop.index }}</th>
+                        <td>{% for role in user.roles %}{% if role == 'ROLE_ADMIN' %} <img src={{ asset('img/software-engineer.png') }} style="width: 10%; height:auto;"> {% endif %}{% endfor  %}</td>
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
                         <td>
