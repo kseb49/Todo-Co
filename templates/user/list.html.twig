@@ -21,13 +21,19 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for user in users %}
+                {% for user in users %}{% set admin = "" %}
                     <tr>
-                        <td>{% for role in user.roles %}{% if role == 'ROLE_ADMIN' %} <img src={{ asset('img/software-engineer.png') }} style="width: 10%; height:auto;"> {% endif %}{% endfor  %}</td>
+                        <td>{% for role in user.roles %}{% if role == 'ROLE_ADMIN' %}{% set admin = true %} <img src={{ asset('img/software-engineer.png') }} style="width: 10%; height:auto;">{% endif %}{% endfor  %}</td>
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
                         <td>
-                            <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                            {% if is_granted('ROLE_ADMIN') and not admin %}
+                                <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                            {% elseif is_granted('ROLE_SUPER_ADMIN')%}
+                                <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                            {% else %}
+
+                            {% endif %}
                              {% if is_granted('ROLE_SUPER_ADMIN') %}
                                 <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
                                     <input type="hidden" name="token" value={{csrf_token('delete-item')}}>

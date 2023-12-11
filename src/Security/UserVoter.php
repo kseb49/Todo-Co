@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class UserVoter extends Voter
 {
-    const GIVE_ACCESS = 'give';
+    const EDIT = 'edit';
 
     public function __construct(
         private Security $security,
@@ -22,14 +22,14 @@ class UserVoter extends Voter
 
 
     protected function supports(string $attribute, mixed $subject) :bool
-    {
-        if (in_array('$attribute', [self::GIVE_ACCESS]) === false) {
+    { 
+        if (in_array($attribute, [self::EDIT]) === false) {
             return false;
         }
 
-        // if (!$subject instanceof User) {
-        //     return false;
-        // }
+        if (!$subject instanceof User) {
+            return false;
+        }
 
         return true;
 
@@ -37,18 +37,31 @@ class UserVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        if ($this->security->isGranted('ROLE_ADMIN') === false) {
+        $user = $token->getUser();
+        if (!$user instanceof User) {
             return false;
         }
 
-        // $users = $subject;
+        $account = $subject;
 
-        // return match ($attribute) {
-        //     self::GIVE_ACCESS => $this->canAuthorize(),
-        //     default => throw new Exception('Erreur'),
-        // };
+        return match ($attribute) {
+            self::EDIT => $this->canEdit($account, $user),
+            default => throw new Exception('Erreur'),
+        };
         return true;
     }
 
+    private function canEdit(User $account, $user) :bool
+    {
+        if ($account->getId() === $user->getId()) {
+            return true;
+        }
 
+        if(in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+            return true;
+        }
+
+        return false;
+
+    }
 }

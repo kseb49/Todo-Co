@@ -6,9 +6,28 @@
 {% block body %}
     <div class="row">
         {{ form_start(form, {'action' : path('user_edit', {'id' : user.id})}) }}
-        {{ form_widget(form) }}
-
-        <button type="submit" class="btn btn-success pull-right">Modifier</button>
-        {{ form_end(form) }}
+        {% if app.user == user %}
+            {{ form_row(form.username) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.password) }}
+        {% endif %}
+            {% if is_granted('ROLE_ADMIN')%}
+                {% for role in user.roles %}
+                    {# role > ROLE_USER #}
+                    {% if loop.length > 1 %}
+                        {% if loop.first %}
+                            {% if role == 'ROLE_ADMIN' and is_granted('ROLE_SUPER_ADMIN') %}
+                                {{ form_row(form.roles, {label : 'Cocher la case pour changer les droits de cet utilisateur vers ROLE_USER ?', value : true, help : "Les droits ADMIN de cet utilisateur seront perdus"}) }}
+                            {# {% elseif role == 'ROLE_SUPER_ADMIN' %} #}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        {{ form_row(form.roles) }}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {{ form_row(form._token) }}
+            <button type="submit" class="btn btn-success pull-right">Ajouter</button>
+        {{ form_end(form, {render_rest: false}) }}
     </div>
 {% endblock %}
