@@ -10,11 +10,9 @@
             {{ form_row(form.email) }}
             {{ form_row(form.password) }}
             {% if app.user %}
-                {% for role in app.user.roles %}
-                    {% if role == 'ROLE_ADMIN' %}
-                        {{ form_row(form.roles) }}
-                    {% endif %}
-                {% endfor %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    {{ form_row(form.roles) }}
+                {% endif %}
             {% endif %}
             {{ form_row(form._token) }}
             <button type="submit" class="btn btn-success pull-right">Ajouter</button>

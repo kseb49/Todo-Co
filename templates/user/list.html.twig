@@ -28,10 +28,12 @@
                         <td>{{ user.email }}</td>
                         <td>
                             <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
-                            <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
-                                <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
-                                <button type="submit" class="btn btn-danger">Supprimer</button>
-                            </form>
+                             {% if is_granted('ROLE_SUPER_ADMIN') %}
+                                <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
+                                    <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
+                                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                                </form>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\UserAdminForm;
 use App\Form\UserForm;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -23,11 +25,11 @@ class UserController extends AbstractController
         return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
     }
 
-
+    
     #[Route('/create', name:'user_create')]
     public function createAction(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
     {
-        if($this->getUser() && in_array('ROLE_ADMIN', $this->getUser()->getRoles()) === false) {
+        if($this->getUser() && $this->isGranted('ROLE_ADMIN') === false) {
             $this->addFlash('error', "Vous avez déjà un compte.");
             return $this->redirectToRoute('homepage');
         }
@@ -38,9 +40,8 @@ class UserController extends AbstractController
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
             if($form->get('roles')->getData() === true) {
-                if ($this->getUser() && in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
-                    $user->setRoles(['ROLE_ADMIN']);
-                }
+                $this->denyAccessUnlessGranted('ROLE_ADMIN', message:"Vous n'êtes pas autorisé à changer les droits de cet utilisateurs");
+                $user->setRoles(['ROLE_ADMIN']);
             }
             $em->persist($user);
             $em->flush();
@@ -56,9 +57,7 @@ class UserController extends AbstractController
     public function editAction(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
     {
         $form = $this->createForm(UserForm::class, $user);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
             $em->persist($user);
@@ -72,8 +71,13 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/delete', name:'user_delete')]
-    public function deleteAction(Request $request)
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function deleteAction(User $user, EntityManagerInterface $em) : RedirectResponse
     {
-        
+        $em->remove($user);
+        $em->flush();
+        $this->addFlash('success', "L'utilisateur a bien été supprimé");
+        return $this->redirectToRoute('user_list');
+
     }
 }
