@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Task;
 use App\Entity\User;
 use App\Form\UserForm;
 use App\Form\EditUserForm;
@@ -125,13 +126,22 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/delete', name:'user_delete')]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
-    public function deleteAction(User $user, EntityManagerInterface $em) : RedirectResponse
+    public function deleteAction(User $user, EntityManagerInterface $em, Request $request, UserRepository $anonymous) : RedirectResponse
     {
-        $em->remove($user);
-        $em->flush();
-        $this->addFlash('success', "L'utilisateur a bien été supprimé");
-        return $this->redirectToRoute('user_list');
+        $this->denyAccessUnlessGranted('delete', $user);
+        $token = $request->request->get('token');
+        if ($this->isCsrfTokenValid('delete-item', $token)) {
+            $task = $em->getRepository(Task::class);
+            $tasks = $task->findByUsers($user->getId());
+            $anonymousUser = $anonymous->findOneBy(['username' => 'anonyme']);
+            foreach ($tasks as $task) {
+                $task->setUser($anonymousUser);
+            }
+            $em->remove($user);
+            $em->flush();
+            $this->addFlash('success', "L'utilisateur a bien été supprimé");
+            return $this->redirectToRoute('user_list');
+        }
 
     }
 }

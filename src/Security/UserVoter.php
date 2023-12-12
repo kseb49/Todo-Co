@@ -13,6 +13,7 @@ class UserVoter extends Voter
 {
     const EDIT = 'edit';
     const AUTH = 'authorize';
+    const DEL = 'delete';
 
     public function __construct(
         private Security $security,
@@ -22,7 +23,7 @@ class UserVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject) :bool
     { 
-        if (in_array($attribute, [self::EDIT, self::AUTH]) === false) {
+        if (in_array($attribute, [self::EDIT, self::AUTH, self::DEL]) === false) {
             return false;
         }
 
@@ -47,6 +48,7 @@ class UserVoter extends Voter
         return match ($attribute) {
             self::EDIT => $this->canEdit($account, $user),
             self::AUTH => $this->canAuthorize($account, $user),
+            self::DEL => $this->canDelete($account, $user),
             default => throw new Exception('Erreur'),
         };
         return true;
@@ -80,4 +82,12 @@ class UserVoter extends Voter
         return false;
 
     }
+
+    private function canDelete(User $account, $user) :bool
+    {
+       return $this->canAuthorize($account, $user);
+
+    }
+
+
 }
