@@ -21,31 +21,45 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for user in users %}{% set admin = "" %}
+                {% for user in users %}
+                    {% set admin = "" %}
+                    {% set super_admin = "" %}
                     <tr>
-                        <td>{% for role in user.roles %}{% if role == 'ROLE_ADMIN' %}{% set admin = true %} <img src={{ asset('img/software-engineer.png') }} style="width: 10%; height:auto;">{% endif %}{% endfor  %}</td>
+                        <td>
+                            {% for role in user.roles %}
+                                {% if role == 'ROLE_ADMIN' %}
+                                    {% set admin = true %}
+                                    <img src={{ asset('img/software-engineer.png') }} style="width: 10%; height:auto;">
+                                {% endif %}
+                                {% if role == 'ROLE_SUPER_ADMIN' %}
+                                    {% set super_admin = true %}
+                                    <img src={{ asset('img/superadminicon.jpg') }} style="width: 10%; height:auto;">
+                                {% endif %}
+                            {% endfor  %}
+                        </td>
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
                         <td>
-                            {% if is_granted('ROLE_ADMIN') and not admin %}
-                                <a href="{{ path('user_toggle_role', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
-                            {% elseif is_granted('ROLE_SUPER_ADMIN')%}
-                                <a href="{{ path('user_toggle_role', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
-                            {% else %}
-
-                            {% endif %}
-                             {% if is_granted('ROLE_ADMIN') %}
-                                {% if is_granted('ROLE_SUPER_ASMIN') %}
-                                    <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
-                                        <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
-                                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                                    </form>
+                            {% if not super_admin %}
+                                {% if is_granted('ROLE_ADMIN') and not admin %}
+                                    <a href="{{ path('user_toggle_role', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                                {% elseif is_granted('ROLE_SUPER_ADMIN') %}
+                                    <a href="{{ path('user_toggle_role', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                                {% else %}
                                 {% endif %}
-                                {% if not admin %}
-                                     <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
-                                        <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
-                                        <button type="submit" class="btn btn-danger">Supprimer</button>
-                                    </form>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    {% if is_granted('ROLE_SUPER_ADMIN') %}
+                                        <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
+                                            <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if not admin %}
+                                        <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
+                                            <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    {% endif %}
                                 {% endif %}
                             {% endif %}
                         </td>
