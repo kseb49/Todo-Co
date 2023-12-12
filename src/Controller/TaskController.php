@@ -17,10 +17,12 @@ class TaskController extends AbstractController
     #[Route("/tasks", name: "task_list")]
     public function listAction(TaskRepository $task)
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        $tasks = $task->findAll();
         return $this->render
         (
             'task/list.html.twig',
-            ['tasks' => $task->findAll()],
+            ['tasks' => $tasks],
         );
 
     }
@@ -29,6 +31,7 @@ class TaskController extends AbstractController
     #[Route("/tasks/create", name: "task_create")]
     public function createAction(Request $request, EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('create');
         $task = new Task();
         $form = $this->createForm(TaskForm::class, $task);
         $form->handleRequest($request);
@@ -47,10 +50,9 @@ class TaskController extends AbstractController
     #[Route("/tasks/{id}/edit", name: "task_edit")]
     public function editAction(Task $task, Request $request, EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('edit', $task, "Vous ne pouvez pas éditer cette tâche");
         $form = $this->createForm(TaskForm::class, $task);
-
         $form->handleRequest($request);
-
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $em->flush();
             $this->addFlash('success', 'La tâche a bien été modifiée.');
@@ -68,6 +70,7 @@ class TaskController extends AbstractController
     #[Route("/tasks/{id}/toggle", name: "task_toggle")]
     public function toggleTaskAction(Task $task, EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('toggle', $task, "Seul le créateur de la tâche peut en changer son état");
         $task->toggle(!$task->isDone());
         $em->flush();
         $message = $task->isDone() === true ? "terminée" : "en cours";
@@ -80,11 +83,7 @@ class TaskController extends AbstractController
     #[Route("/tasks/{id}/delete", name: "task_delete")]
     public function deleteTaskAction(Task $task, EntityManagerInterface $em, Request $request)
     {
-        if ($this->getUser() !== $task->getUser()) {
-            $this->addFlash('error', "Vous ne pouvez pas supprimer la tâche d'un autre utilisateur");
-            return $this->redirectToRoute('task_list');
-        }
-
+        $this->denyAccessUnlessGranted('delete', $task, "Vous ne pouvez pas supprimer la tâche d'un autre utilisateur");
         $submittedToken = $request->request->get('token');
         if ($this->isCsrfTokenValid('delete-task', $submittedToken)) {
             $em->remove($task);

@@ -18,7 +18,7 @@
                 </div>
         {% endfor %}
     </div>
-    {% if app.user and app.user.roles[0] == 'ROLE_ADMIN' %}
+    {% if is_granted('ROLE_ADMIN') %}
         <hr class="border border-primary border-3">
         <h4 class="text-center">⬇️Tâches des autres utilisateurs⬇️</h4>
         <hr class="border border-primary border-3">
