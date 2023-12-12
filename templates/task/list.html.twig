@@ -16,6 +16,26 @@
                 <div class="alert alert-warning" role="alert">
                     Il n'y a pas encore de tâche enregistrée. <a href="{{ path('task_create') }}" class="btn btn-warning pull-right">Créer une tâche</a>
                 </div>
+
+                <div>
+                    <form action="{{ path('task_toggle', {'id' : task.id }) }}">
+                        <button class="btn btn-success btn-sm pull-right">
+                            {% if not task.isDone %}Marquer comme faite{% else %}Marquer non terminée{% endif %}
+                        </button>
+                    </form>
+                    {% if app.user.id == task.user.id %}
+                    <form action="{{ path('task_delete', {'id' : task.id }) }}" method='post'>
+                        <input type="hidden" name="token" value={{csrf_token('delete-task')}}>
+                        <button class="btn btn-danger btn-sm pull-right">Supprimer</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                Il n'y a pas encore de tâche enregistrée. <a href="{{ path('task_create') }}" class="btn btn-warning pull-right">Créer une tâche</a>
+            </div>
         {% endfor %}
     </div>
     {% if is_granted('ROLE_ADMIN') %}
