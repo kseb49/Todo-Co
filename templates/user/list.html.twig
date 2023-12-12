@@ -11,27 +11,57 @@
         </div>
     {% else %}
         <div class="row">
-            <table class="table">
-                <thead>
+            <table class="table table-hover">
+                <thead class="thead-dark">
                 <tr>
-                    <th>#</th>
-                    <th>Nom d'utilisateur</th>
-                    <th>Adresse d'utilisateur</th>
-                    <th>Actions</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Nom d'utilisateur</th>
+                    <th scope="col">Adresse d'utilisateur</th>
+                    <th scope="col">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for user in users %}
+                    {% set admin = "" %}
+                    {% set super_admin = "" %}
                     <tr>
-                        <th scope="row">{{ loop.index }}</th>
+                        <td>
+                            {% for role in user.roles %}
+                                {% if role == 'ROLE_ADMIN' %}
+                                    {% set admin = true %}
+                                    <img src={{ asset('img/software-engineer.png') }} style="width: 10%; height:auto;">
+                                {% endif %}
+                                {% if role == 'ROLE_SUPER_ADMIN' %}
+                                    {% set super_admin = true %}
+                                    <img src={{ asset('img/superadminicon.jpg') }} style="width: 10%; height:auto;">
+                                {% endif %}
+                            {% endfor  %}
+                        </td>
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
                         <td>
-                            <a href="{{ path('user_edit', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
-                            <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
-                                <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
-                                <button type="submit" class="btn btn-danger">Supprimer</button>
-                            </form>
+                            {% if not super_admin %}
+                                {% if is_granted('ROLE_ADMIN') and not admin %}
+                                    <a href="{{ path('user_toggle_role', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                                {% elseif is_granted('ROLE_SUPER_ADMIN') %}
+                                    <a href="{{ path('user_toggle_role', {'id' : user.id}) }}" class="btn btn-success btn-sm">Edit</a>
+                                {% else %}
+                                {% endif %}
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    {% if is_granted('ROLE_SUPER_ADMIN') %}
+                                        <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
+                                            <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if not admin %}
+                                        <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
+                                            <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
+                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

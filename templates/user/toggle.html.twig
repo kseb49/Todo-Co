@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block header_title %}<h1>Modifier les droits de <strong>{{ user.username }}</strong></h1>{% endblock %}
+{% block header_img %}{% endblock %}
+
+{% block body %}
+    <div class="row">
+        {{ form_start(form, {'action' : path('user_toggle_role', {'id' : user.id})}) }}
+            {% if is_granted('ROLE_ADMIN')%}
+                {% for role in user.roles %}
+                    {# role > ROLE_USER #}
+                    {% if loop.length > 1 %}
+                        {% if loop.first %}
+                            {% if role == 'ROLE_ADMIN' and is_granted('ROLE_SUPER_ADMIN') %}
+                            {{ form_row(form.roles, {'label' : 'Cocher la case pour changer les droits de cet utilisateur vers ROLE_USER ?', 'help' : "Les droits ADMIN de cet utilisateur seront perdus"}) }}
+                            {# {% elseif role == 'ROLE_SUPER_ADMIN' %} #}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        {{ form_row(form.roles) }}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+                <button type="submit" class="btn btn-success pull-right">Modifier</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -6,9 +6,9 @@
 {% block body %}
     <div class="row">
         {{ form_start(form, {'action' : path('user_edit', {'id' : user.id})}) }}
-        {{ form_widget(form) }}
-
-        <button type="submit" class="btn btn-success pull-right">Modifier</button>
+            {{ form_widget(form)}}
+            <button type="submit" class="btn btn-success pull-right">Modifier</button>
         {{ form_end(form) }}
+         <a href= {{ path('user_password_change', {'id' : user.id}) }} ><button class="btn btn-success">Modifier votre mot de passe</button></a>
     </div>
 {% endblock %}
