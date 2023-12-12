@@ -3,10 +3,8 @@
 namespace App\Security;
 
 use Exception;
-use App\Entity\Post;
 use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
-use function PHPUnit\Framework\throwException;
 
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -14,6 +12,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 class UserVoter extends Voter
 {
     const EDIT = 'edit';
+    const AUTH = 'authorize';
 
     public function __construct(
         private Security $security,
@@ -23,7 +22,7 @@ class UserVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject) :bool
     { 
-        if (in_array($attribute, [self::EDIT]) === false) {
+        if (in_array($attribute, [self::EDIT, self::AUTH]) === false) {
             return false;
         }
 
@@ -37,6 +36,7 @@ class UserVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
+        // Check if the user is connected
         $user = $token->getUser();
         if (!$user instanceof User) {
             return false;
@@ -46,6 +46,7 @@ class UserVoter extends Voter
 
         return match ($attribute) {
             self::EDIT => $this->canEdit($account, $user),
+            self::AUTH => $this->canAuthorize($account, $user),
             default => throw new Exception('Erreur'),
         };
         return true;
@@ -57,7 +58,22 @@ class UserVoter extends Voter
             return true;
         }
 
-        if(in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+        return false;
+
+    }
+
+
+    private function canAuthorize(User $account, $user) :bool
+    {
+        if(in_array('ROLE_SUPER_ADMIN', $account->getRoles())) {
+            return false;
+        }
+
+        if(in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+            return true;
+        }
+
+        if(in_array('ROLE_ADMIN', $user->getRoles()) && in_array('ROLE_ADMIN', $account->getRoles()) === false) {
             return true;
         }
 
