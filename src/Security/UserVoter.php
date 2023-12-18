@@ -5,7 +5,6 @@ namespace App\Security;
 use Exception;
 use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
-
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -14,6 +13,7 @@ class UserVoter extends Voter
     const EDIT = 'edit';
     const AUTH = 'authorize';
     const DEL = 'delete';
+    const CREATE = 'create';
 
     public function __construct(
         private Security $security,
@@ -23,12 +23,15 @@ class UserVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject) :bool
     { 
-        if (in_array($attribute, [self::EDIT, self::AUTH, self::DEL]) === false) {
+        if (in_array($attribute, [self::EDIT, self::AUTH, self::DEL, self::CREATE]) === false) {
             return false;
         }
 
-        if (!$subject instanceof User) {
-            return false;
+        if ($subject !== null) {
+            if (!$subject instanceof User) {
+                return false;
+            }
+
         }
 
         return true;
