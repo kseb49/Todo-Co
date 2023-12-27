@@ -11,7 +11,7 @@ Préciser les circonstances détaillées dans lequel le bug apparaît et **comme
 Suivez ensuite les [instructions](#instructions) pour faire une pull request.
 
 # Proposer une fonctionnalitée
-Pour une nouvelle fonctionnalité proposer votre travail en ouvrant dabord un issue sur le [dépôt github](https://github.com/kseb49/Todo-Co/issues), sous l'étiquette new features.
+Pour une nouvelle fonctionnalitée proposer votre travail en ouvrant dabord un issue sur le [dépôt github](https://github.com/kseb49/Todo-Co/issues), sous l'étiquette new features.
 
 Documentez y votre fonctionnalité le plus précisémment possible.
 
