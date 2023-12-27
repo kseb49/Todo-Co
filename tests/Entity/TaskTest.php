@@ -2,7 +2,9 @@
 
 namespace App\Tests\Entity;
 
+use DateTime;
 use App\Entity\Task;
+use App\Entity\User;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -35,4 +37,19 @@ class TaskTest extends TestCase
     }
 
 
+    public function testSetCreatedAt()
+    {
+        $task = new Task();
+        $task->setCreatedAt();
+        $this->assertInstanceOf(DateTime::class, $task->getCreatedAt());
+    }
+
+
+    public function testSetUser()
+    {
+        $task = new Task();
+        $user = $this->createStub(User::class);
+        $task->setUser($user);
+        $this->assertSame($user, $task->getUser());
+    }
 }
