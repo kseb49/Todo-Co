@@ -8,14 +8,16 @@ use App\Form\TaskForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class TaskController extends AbstractController
 {
 
 
     #[Route("/tasks", name: "task_list")]
-    public function listAction(TaskRepository $task)
+    public function list(TaskRepository $task): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         $tasks = $task->findAll();
@@ -29,7 +31,7 @@ class TaskController extends AbstractController
 
 
     #[Route("/tasks/create", name: "task_create")]
-    public function createAction(Request $request, EntityManagerInterface $em)
+    public function create(Request $request, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('create');
         $task = new Task();
@@ -48,7 +50,7 @@ class TaskController extends AbstractController
 
 
     #[Route("/tasks/{id}/edit", name: "task_edit")]
-    public function editAction(Task $task, Request $request, EntityManagerInterface $em)
+    public function edit(Task $task, Request $request, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('edit', $task, "Vous ne pouvez pas éditer cette tâche");
         $form = $this->createForm(TaskForm::class, $task);
@@ -68,7 +70,7 @@ class TaskController extends AbstractController
 
 
     #[Route("/tasks/{id}/toggle", name: "task_toggle")]
-    public function toggleTaskAction(Task $task, EntityManagerInterface $em)
+    public function toggle(Task $task, EntityManagerInterface $em): RedirectResponse
     {
         $this->denyAccessUnlessGranted('toggle', $task, "Seul le créateur de la tâche peut en changer son état");
         $task->toggle(!$task->isDone());
@@ -81,7 +83,7 @@ class TaskController extends AbstractController
 
 
     #[Route("/tasks/{id}/delete", name: "task_delete")]
-    public function deleteTaskAction(Task $task, EntityManagerInterface $em, Request $request)
+    public function deleteTask(Task $task, EntityManagerInterface $em, Request $request): RedirectResponse
     {
         $this->denyAccessUnlessGranted('delete', $task, "Vous ne pouvez pas supprimer la tâche d'un autre utilisateur");
         $submittedToken = $request->request->get('token');

@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('users')]
@@ -22,7 +23,7 @@ class UserController extends AbstractController
 
 
     #[Route('/list', name:'user_list')]
-    public function listAction(UserRepository $users)
+    public function list(UserRepository $users): RedirectResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
@@ -30,7 +31,7 @@ class UserController extends AbstractController
 
 
     #[Route('/create', name:'user_create')]
-    public function createAction(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
+    public function create(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em): Response
     {
         if($this->getUser() && $this->isGranted('ROLE_ADMIN') === false) {
             $this->addFlash('error', "Vous avez déjà un compte.");
@@ -57,7 +58,7 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/edit', name:'user_edit')]
-    public function editAction(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
+    public function edit(User $user, Request $request, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditUserForm::class, $user);
@@ -75,7 +76,7 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/toggle', name:'user_toggle_role')]
-    public function toggleRole(User $user, EntityManagerInterface $em, Request $request)
+    public function toggleRole(User $user, EntityManagerInterface $em, Request $request): Response
     {
         $this->denyAccessUnlessGranted('authorize', subject : $user, message: "Vous n'êtes pas autorisé à changer les droits de cet utilisateurs");
         $form = $this->createForm(ToggleRoleForm::class, $user);
@@ -106,7 +107,7 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/editpass', name:'user_password_change')]
-    public function editPassword(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em)
+    public function editPassword(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em): Respoonse
     {
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditPasswordForm::class, $user);
@@ -125,7 +126,7 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/delete', name:'user_delete')]
-    public function deleteAction(User $user, EntityManagerInterface $em, Request $request, UserRepository $anonymous) : RedirectResponse
+    public function delete(User $user, EntityManagerInterface $em, Request $request, UserRepository $anonymous) : RedirectResponse
     {
         $this->denyAccessUnlessGranted('delete', $user);
         $token = $request->request->get('token');
