@@ -3,6 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\User;
+use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -16,6 +17,7 @@ class UserTest extends TestCase
         $this->assertSame($email, $user->getEmail());
     }
 
+
     #[DataProvider('rolesProvider')]
     public function testSetRoles(array $role, array $roles)
     {
@@ -26,11 +28,18 @@ class UserTest extends TestCase
 
 
     #[DataProvider('userNameProvider')]
-    public function testSetUserName()
+    public function testSetUserName(string $name)
     {
         $user = new User();
-        $user->setRoles($role);
-        $this->assertSame($roles, $user->getRoles());
+        $user->setUsername($name);
+        $this->assertSame($name, $user->getUsername());
+    }
+
+
+    public function testGetTask()
+    {
+        $user = new User();
+        $this->assertInstanceOf(Collection::class, $user->getTask());
     }
 
 
@@ -54,6 +63,13 @@ class UserTest extends TestCase
     }
 
 
+    public static function userNameProvider(): array
+    {
+        return
+        [
+            ['john'],
+            ['jane'],
+        ];
+    }
 
-   
 }
