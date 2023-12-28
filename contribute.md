@@ -11,7 +11,7 @@ Préciser les circonstances détaillées dans lequel le bug apparaît et **comme
 Suivez ensuite les [instructions](#instructions) pour faire une pull request.
 
 # Proposer une fonctionnalitée
-Pour une nouvelle fonctionnalitée proposer votre travail en ouvrant dabord un issue sur le [dépôt github](https://github.com/kseb49/Todo-Co/issues), sous l'étiquette new features.
+Pour une nouvelle fonctionnalitée proposer votre travail en ouvrant d'abord un issue sur le [dépôt github](https://github.com/kseb49/Todo-Co/issues), sous l'étiquette new features.
 
 Documentez y votre fonctionnalité le plus précisémment possible.
 
@@ -41,8 +41,6 @@ Le projet est couvert par des tests unitaires et fonctionnels implémentés avec
 - Sur Github envoyez une [Pull Request ](https://docs.github.com/fr/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) référencez y l'issue associé.
 
 # Standards à respecter
-[PSR1](https://www.php-fig.org/psr/psr-1/)
+Le code doit respecter l'ensemble des règles décrites dans les [PSR1](https://www.php-fig.org/psr/psr-1/) et [PSR12](https://www.php-fig.org/psr/psr-12/) et [PSR4](https://www.php-fig.org/psr/psr-4/)
 
-[PSR2](https://www.php-fig.org/psr/psr-2/)
-
-[Symfony coding Standards](https://symfony.com/doc/current/contributing/code/standards.html)
+Suivez le [Symfony coding Standards](https://symfony.com/doc/current/contributing/code/standards.html) qui est basé sur ces règles.
