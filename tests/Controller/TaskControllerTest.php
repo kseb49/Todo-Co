@@ -2,12 +2,15 @@
 
 namespace App\Tests\Entity;
 
+use App\Entity\Task;
+use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class TaskControllerTest extends WebTestCase
 {
+
     public function testListRedirect()
     {
         $client = static::createClient();
@@ -44,6 +47,22 @@ class TaskControllerTest extends WebTestCase
         $this->assertSelectorExists('form');
         $this->assertSame('Ajouter', $button);
         $this->assertPageTitleContains('Créer une tache');
+    }
+
+    public function testEdit()
+    {
+        $client = static::createClient();
+        $userRepository = static::getContainer()->get(UserRepository::class);
+        $taskRepository = static::getContainer()->get(TaskRepository::class);
+        $user = $userRepository->findOneByEmail('testuser0@test.com');
+        $task = $taskRepository->findOneById(['user_id' => $user]);
+        $client->loginUser($user);
+        $crawler = $client->request('GET', '/tasks/edit');
+        $this->assertResponseIsSuccessful();
+        $button = $crawler->filter('button[type=submit]')->text();
+        $this->assertSelectorExists('form');
+        $this->assertSame('Modifier', $button);
+        $this->assertPageTitleContains('Modifier une tache');
     }
     // public function testListException()
     // {
