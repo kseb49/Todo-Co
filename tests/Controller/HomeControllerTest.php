@@ -2,6 +2,7 @@
 
 namespace App\Tests\Entity;
 
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 
@@ -17,7 +18,17 @@ class HomeControllerTest extends WebTestCase
     }
 
 
-    // public function testListException()
+    public function testHomePageRedirect()
+    {
+        $client = static::createClient();
+        $userRepository = static::getContainer()->get(UserRepository::class);
+        $user = $userRepository->findOneByEmail('testuser0@test.com');
+        $client->loginUser($user);
+        $crawler = $client->request('GET', '/');
+        $link = $crawler->filter('a[href="/logout"]')->text();
+        $this->assertResponseIsSuccessful();
+        $this->assertSame('Se déconnecter', $link);
+    }// public function testListException()
     // {
     //     $this->expectException(AccessDeniedException::class);
     //     $client = static::createClient();
