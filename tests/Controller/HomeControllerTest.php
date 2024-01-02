@@ -10,8 +10,10 @@ class HomeControllerTest extends WebTestCase
     public function testHomePage()
     {
         $client = static::createClient();
-        $client->request('GET', '/');
+        $crawler = $client->request('GET', '/');
+        $link = $crawler->filter('a[href="/login"]')->text();
         $this->assertResponseIsSuccessful();
+        $this->assertSame('Se connecter', $link);
     }
 
 

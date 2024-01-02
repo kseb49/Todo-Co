@@ -3,7 +3,7 @@
 {% block header_img %}{% endblock %}
 
 {% block header_title %}<h1>Liste des utilisateurs</h1>{% endblock %}
-
+{% block title %} {{ parent() }} - Liste des utilisateurs {% endblock  %}
 {% block body %}
     {% if users|length == 0 %}
         <div class="alert alert-warning" role="alert">

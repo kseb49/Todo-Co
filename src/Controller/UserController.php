@@ -107,7 +107,7 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/editpass', name:'user_password_change')]
-    public function editPassword(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em): Respoonse
+    public function editPassword(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditPasswordForm::class, $user);
