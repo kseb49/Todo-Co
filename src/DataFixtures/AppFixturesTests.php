@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use Faker\Factory;
+use App\Entity\Task;
 use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -19,11 +20,11 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
 
     public static function getGroups(): array
     {
-        return ['test_user'];
+        return ['test'];
     }
 
     /**
-     * Create test users
+     * Create 3 test users and 25 tasks
      *
      * @param ObjectManager $manager
      * @return void
@@ -31,7 +32,7 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
-        $roles = [['ROLE_ADMIN'], ['ROLE_USER'], ['ROLE_SUPER_ADMIN'] ];
+        $roles = [['ROLE_USER'], ['ROLE_ADMIN'], ['ROLE_SUPER_ADMIN'] ];
         for ($i=0; $i < 3; $i++) {
             $user = new User;
             $user->setEmail('testuser'.$i.'@test.com');
@@ -40,7 +41,18 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
             $user->setPassword($this->passwordHasher->hashPassword($user, '123456'));
             $manager->persist($user);
         }
+        $manager->flush();
 
+        $users = $manager->getRepository(User::class)->findAll();
+        for ($i=0; $i < 25; $i++) {
+            $task =new Task();
+            $task->setTitle('Tache n°'.$i);
+            $task->setContent($faker->text(35));
+            $task->setCreatedAt($faker->dateTime());
+            $task->setUser($faker->randomElement($users));
+            $task->toggle($faker->boolean());
+            $manager->persist($task);
+        }
         $manager->flush();
     }
 
