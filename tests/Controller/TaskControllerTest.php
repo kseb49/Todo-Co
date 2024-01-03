@@ -77,11 +77,11 @@ class TaskControllerTest extends WebTestCase
     //     $client = static::createClient();
     //     $userRepository = static::getContainer()->get(UserRepository::class);
     //     $user = $userRepository->findOneByEmail('testuser0@test.com');
-    //     // $taskRepository = static::getContainer()->get(TaskRepository::class);
-    //     // $task = $taskRepository->findBy(['user' => $user]);
-    //     // $param = $task[0]->getId();
+    //     $taskRepository = static::getContainer()->get(TaskRepository::class);
+    //     $task = $taskRepository->findOneBy(['user' => $user]);
+    //     $param = $task->getId();
     //     $client->loginUser($user);
-    //     // $crawler = $client->request('GET', '/tasks/{id}/edit', ['id' => $param]);
+    //     $crawler = $client->request('GET', '/tasks/{id}/edit', ['id' => $param]);
     //     $this->assertResponseIsSuccessful();
     //     $button = $crawler->filter('button[type=submit]')->text();
     //     $this->assertSelectorExists('form');

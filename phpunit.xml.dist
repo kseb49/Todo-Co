@@ -17,9 +17,9 @@
   <!-- <listeners>
         <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
     </listeners> -->
-  <!-- <extensions>
-    <bootstrap class="tests/bootstrap.php">
-    </extensions> -->
+  <!-- <extensions> -->
+    <!-- <bootstrap class="tests/bootstrap.php"> -->
+    <!-- </extensions> -->
   <source>
     <include>
       <directory suffix=".php">src</directory>
