@@ -28,13 +28,7 @@ class HomeControllerTest extends WebTestCase
         $link = $crawler->filter('a[href="/logout"]')->text();
         $this->assertResponseIsSuccessful();
         $this->assertSame('Se déconnecter', $link);
-    }// public function testListException()
-    // {
-    //     $this->expectException(AccessDeniedException::class);
-    //     $client = static::createClient();
-    //     $client->request('GET', '/list');
-    //     // $repo  = $this->createMock(TaskRepository::class);
-    //     // $task = new TaskController();
-    //     // $task->list($repo);
-    // }
+    }
+
+
 }
