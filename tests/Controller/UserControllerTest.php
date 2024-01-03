@@ -30,7 +30,7 @@ class UserControllerTest extends WebTestCase
     }
 
 
-    public function testUserList()
+    public function testList()
     {
         $client = static::createClient();
         $userRepository = static::getContainer()->get(UserRepository::class);
@@ -52,6 +52,7 @@ class UserControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $userRepository = static::getContainer()->get(UserRepository::class);
+        // ROLE_USER user.
         $user = $userRepository->findOneByEmail('testuser0@test.com');
         $client->loginUser($user);
         $client->request('GET', 'users/create');
@@ -61,7 +62,7 @@ class UserControllerTest extends WebTestCase
     }
 
 
-    public function testUserCreateTaskForm()
+    public function testUserCreateForm()
     {
         $client = static::createClient();
         $userRepository = static::getContainer()->get(UserRepository::class);
@@ -79,6 +80,7 @@ class UserControllerTest extends WebTestCase
                 sprintf('%s[password][second]', $form->getName()) => "123456",
             ]
         );
+        $this->assertResponseRedirects('/');
         $client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! L'utilisateur a bien été ajouté.");
 
