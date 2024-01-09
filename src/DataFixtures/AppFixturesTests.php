@@ -33,10 +33,15 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
     {
         $faker = Factory::create('fr_FR');
         $roles = [['ROLE_USER'], ['ROLE_ADMIN'], ['ROLE_SUPER_ADMIN'] ];
-        for ($i=0; $i < 3; $i++) {
+        for ($i=0; $i < 4; $i++) {
             $user = new User;
             $user->setEmail('testuser'.$i.'@test.com');
-            $user->setRoles($roles[$i]);
+            if ($i < 2) {
+                $user->setRoles($roles[0]);
+            }
+            if ($i >= 2 ) {
+                $user->setRoles($roles[$i - 1]);
+            }
             $user->setUsername($faker->userName());
             $user->setPassword($this->passwordHasher->hashPassword($user, '123456'));
             $manager->persist($user);

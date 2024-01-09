@@ -48,6 +48,7 @@ class TaskControllerTest extends WebTestCase
         $link = $crawler->filter('a[href="/tasks/create"]')->text();
         $this->assertSame('Créer une tâche', $link);
         $this->assertSelectorTextContains('h4', "⬇️Vos Tâches⬇️");
+        $this->assertPageTitleContains('Liste des tâches');
 
     }
 
