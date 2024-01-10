@@ -24,7 +24,7 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
     }
 
     /**
-     * Create 3 test users and 25 tasks
+     * Create 4 test users and 25 tasks
      *
      * @param ObjectManager $manager
      * @return void
@@ -46,6 +46,13 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
             $user->setPassword($this->passwordHasher->hashPassword($user, '123456'));
             $manager->persist($user);
         }
+
+        $anonymousUser = new User;
+        $anonymousUser->setEmail($faker->email());
+        $anonymousUser->setUsername('anonyme');
+        $anonymousUser->setPassword($this->passwordHasher->hashPassword($user, '123456'));
+        $manager->persist($anonymousUser);
+
         $manager->flush();
 
         $users = $manager->getRepository(User::class)->findAll();
@@ -54,7 +61,21 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
             $task->setTitle('Tache n°'.$i);
             $task->setContent($faker->text(35));
             $task->setCreatedAt($faker->dateTime());
-            $task->setUser($faker->randomElement($users));
+            if ($i < 5) {
+                $task->setUser($users[0]);
+            }
+            if ($i >=5 && $i < 10) {
+                $task->setUser($users[1]);
+            }
+            if ($i < 15 && $i >=10) {
+                $task->setUser($users[2]);
+            }
+            if ($i >= 15 && $i < 20) {
+                $task->setUser($users[3]);
+            }
+            if ($i >= 20) {
+                $task->setUser($users[4]);
+            }
             $task->toggle($faker->boolean());
             $manager->persist($task);
         }
