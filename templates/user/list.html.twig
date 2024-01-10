@@ -51,13 +51,13 @@
                                     {% if is_granted('ROLE_SUPER_ADMIN') %}
                                         <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
                                             <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
-                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                            <button type="submit" class="btn btn-danger" id="delete-user{{user.id}}">Supprimer</button>
                                         </form>
                                     {% endif %}
                                     {% if not admin %}
                                         <form action= {{ path('user_delete', {'id' : user.id})}} method= 'post'>
                                             <input type="hidden" name="token" value={{csrf_token('delete-item')}}>
-                                            <button type="submit" class="btn btn-danger">Supprimer</button>
+                                            <button type="submit" class="btn btn-danger" id="delete-user{{user.id}}">Supprimer</button>
                                         </form>
                                     {% endif %}
                                 {% endif %}

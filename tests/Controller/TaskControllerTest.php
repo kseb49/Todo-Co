@@ -135,12 +135,25 @@ class TaskControllerTest extends WebTestCase
         $this->client->loginUser($this->user);
         $crawler = $this->client->request('GET', '/tasks/'.$param.'/edit');
         $this->assertResponseIsSuccessful();
-        $button = $crawler->filter('button[type=submit]')->text();
+        $button = $crawler->filter('button[type=submit]');
         $this->assertSelectorExists('form');
-        $this->assertSame('Modifier', $button);
+        $this->assertSame('Modifier', $button->text());
         $this->assertPageTitleContains('Modifier une tache');
         $this->assertFormValue('form', 'task_form[title]', $task->getTitle());
         $this->assertFormValue('form', 'task_form[content]', $task->getContent());
+        $form = $button->form();
+        $this->client->submit(
+            $form,
+                [
+                    sprintf('%s[title]', $form->getName()) => "Edited title",
+                    sprintf('%s[content]', $form->getName()) => "edited content",
+                ]
+            );
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a bien été modifiée.");
+        $editedTask = $this->taskRepository->find($param);
+        $this->assertSame("Edited title", $editedTask->getTitle());
+        $this->assertSame("edited content", $editedTask->getContent());
 
     }
 

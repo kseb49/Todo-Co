@@ -38,6 +38,14 @@ class UserControllerTest extends WebTestCase
      */
     private User|null $userAdmin = null;
 
+
+    /**
+     * user with ROLE_SUPER_ADMIN
+     *
+     * @var User|null
+     */
+    private User|null $userSuperAdmin = null;
+
     public function setUp(): void
     {
         $this->client = static::createClient();
@@ -45,6 +53,7 @@ class UserControllerTest extends WebTestCase
         $this->user = $this->userRepository->findOneByEmail('testuser1@test.com');
         $this->userToUpgrade = $this->userRepository->findOneByEmail('testuser0@test.com');
         $this->userAdmin = $this->userRepository->findOneByEmail('testuser2@test.com');
+        $this->userSuperAdmin = $this->userRepository->findOneByEmail('testuser3@test.com');
 
     }
 
@@ -118,6 +127,39 @@ class UserControllerTest extends WebTestCase
 
 
     /**
+     * editing an user account
+     *
+     * @return void
+     */
+    public function testUserEditForm()
+    {
+        $this->client->loginUser($this->user);
+        $crawler = $this->client->request('GET', sprintf('/users/%s/edit', $this->user->getId()));
+        $this->assertResponseIsSuccessful();
+        $button = $crawler->filter('button[type=submit]');
+        $this->assertSelectorExists('form');
+        $this->assertSame('Modifier', $button->text());
+        $this->assertPageTitleContains('Modification de compte');
+        $this->assertFormValue('form', 'edit_user_form[username]', $this->user->getUsername());
+        $this->assertFormValue('form', 'edit_user_form[email]', $this->user->getEmail());
+        $form = $button->form();
+        $this->client->submit(
+            $form,
+                [
+                    sprintf('%s[username]', $form->getName()) => "Edit name",
+                    sprintf('%s[email]', $form->getName()) => "editemailtest@test.fr",
+                ]
+            );
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Modification réussie");
+        $editedUser = $this->userRepository->find($this->user->getId());
+        $this->assertSame("Edit name", $editedUser->getUsername());
+        $this->assertSame("editemailtest@test.fr", $editedUser->getEmail());
+
+    }
+
+
+    /**
      * A ROLE_ADMIN can upgrade a role
      *
      * @return void
@@ -138,6 +180,37 @@ class UserControllerTest extends WebTestCase
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Le rôle a bien était modifié");
         $this->assertTrue(in_array('ROLE_ADMIN', $this->userRepository->findOneByEmail('testuser0@test.com')->getRoles()));
+
+    }
+
+
+    /**
+     * ROLE_ADMIN can Delete a user account
+     *
+     * @return void
+     */
+    public function testDeleteUser()
+    {
+        $this->client->loginUser($this->userAdmin);
+        $this->client->request('GET', '/users/list');
+        $this->client->submitForm('delete-user'.$this->user->getId());
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! L'utilisateur a bien été supprimé");
+        $this->assertEmpty($this->userRepository->find($this->user->getId()));
+
+    }
+
+
+    /**
+     * ROLE_ADMIN cannot Delete a ROLE_SUPER_ADMIN user account
+     *
+     * @return void
+     */
+    public function testDeleteAdminUser()
+    {
+        $this->client->loginUser($this->userAdmin);
+        $this->client->request('GET', '/users/'.$this->userSuperAdmin->getId().'/delete');
+        $this->assertResponseStatusCodeSame(403);
 
     }
 
