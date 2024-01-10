@@ -2,23 +2,46 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
+/**
+ * Tests class
+ * test the methods of the TaskController
+ */
 class TaskControllerTest extends WebTestCase
 {
 
     private KernelBrowser|null $client = null;
+
     private UserRepository|null $userRepository = null;
+
     private TaskRepository|null $taskRepository = null;
+
+    /**
+     * user with ROLE_USER
+     *
+     * @var User|null
+     */
     private User|null $user = null;
+
+    /**
+     * user with ROLE_ADMIN
+     *
+     * @var User|null
+     */
     private User|null $userAdmin = null;
+
+    /**
+     * the anonymous user
+     *
+     * @var User|null
+     */
     private User|null $userAnonyme = null;
+
 
     public function setUp(): void
     {
@@ -31,6 +54,7 @@ class TaskControllerTest extends WebTestCase
 
     }
 
+
     /**
      * test the access control to the users list
      *
@@ -38,7 +62,6 @@ class TaskControllerTest extends WebTestCase
      */
     public function testListRedirect()
     {
-        // $client = static::createClient();
         $this->client->request('GET', '/tasks');
         $this->assertResponseRedirects('/login');
 
@@ -47,13 +70,8 @@ class TaskControllerTest extends WebTestCase
 
     public function testList()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
-        // $client->loginUser($user);
         $this->client->loginUser($this->user);
         $crawler = $this->client->request('GET', '/tasks');
-        // $crawler = $client->request('GET', '/tasks');
         $this->assertResponseIsSuccessful();
         $link = $crawler->filter('a[href="/tasks/create"]')->text();
         $this->assertSame('Créer une tâche', $link);
@@ -63,13 +81,13 @@ class TaskControllerTest extends WebTestCase
     }
 
 
+    /**
+     * test the access to the create a task form
+     *
+     * @return void
+     */
     public function testCreate()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
-        // $client->loginUser($user);
-        // $crawler = $client->request('GET', '/tasks/create');
         $this->client->loginUser($this->user);
         $crawler = $this->client->request('GET', '/tasks/create');
         $this->assertResponseIsSuccessful();
@@ -77,6 +95,7 @@ class TaskControllerTest extends WebTestCase
         $button = $crawler->filter('button[type=submit]')->text();
         $this->assertSame('Ajouter', $button);
         $this->assertPageTitleContains('Créer une tache');
+
     }
 
 
@@ -87,11 +106,6 @@ class TaskControllerTest extends WebTestCase
      */
     public function testCreateTaskForm()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
-        // $client->loginUser($user);
-        // $crawler = $client->request('GET', '/tasks/create');
         $this->client->loginUser($this->user);
         $crawler = $this->client->request('GET', '/tasks/create');
         $button = $crawler->selectButton('Ajouter');
@@ -108,6 +122,7 @@ class TaskControllerTest extends WebTestCase
 
     }
 
+
     /**
      * Test the access to the edit form
      *
@@ -115,10 +130,6 @@ class TaskControllerTest extends WebTestCase
      */
     public function testEdit()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
-        // $taskRepository = static::getContainer()->get(TaskRepository::class);
         $task = $this->taskRepository->findOneBy(['user' => $this->user]);
         $param = $task->getId();
         $this->client->loginUser($this->user);
@@ -133,6 +144,7 @@ class TaskControllerTest extends WebTestCase
 
     }
 
+
     /**
      * Delete a task (by its owner)
      *
@@ -140,10 +152,6 @@ class TaskControllerTest extends WebTestCase
      */
     public function testDelete()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
-        // $taskRepository = static::getContainer()->get(TaskRepository::class);
         $task = $this->taskRepository->findOneBy(['user' => $this->user]);
         $taskId = $task->getId();
         $this->client->loginUser($this->user);
@@ -157,14 +165,13 @@ class TaskControllerTest extends WebTestCase
 
     }
 
+    /**
+     * A ROLE_ADMIN user can delete an anonymous task
+     *
+     * @return void
+     */
     public function testDeleteAnonyme()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser2@test.com');
-        // $anonymousUser = $userRepository->findOneBy(['username' => 'anonyme']);
-        // $taskRepository = static::getContainer()->get(TaskRepository::class);
-        // $task = $taskRepository->findOneBy(['user' => $anonymousUser]);
         $task = $this->taskRepository->findOneBy(['user' => $this->userAnonyme]);
         $taskId = $task->getId();
         $this->client->loginUser($this->userAdmin);
@@ -177,14 +184,13 @@ class TaskControllerTest extends WebTestCase
     }
 
 
+    /**
+     * A ROLE_USER user cannot delete an anonymous task
+     *
+     * @return void
+     */
     public function testDeleteAnonymeByUnauthorized()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
-        // $anonymousUser = $userRepository->findOneBy(['username' => 'anonyme']);
-        // $taskRepository = static::getContainer()->get(TaskRepository::class);
-        // $task = $taskRepository->findOneBy(['user' => $anonymousUser]);
         $task = $this->taskRepository->findOneBy(['user' => $this->userAnonyme]);
         $taskId = $task->getId();
         $this->client->loginUser($this->user);

@@ -2,36 +2,52 @@
 
 namespace App\Tests\Entity;
 
-use App\Entity\Task;
 use App\Entity\User;
-use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-
+/**
+ * Tests Class
+ * test the methods of the UserController
+ */
 class UserControllerTest extends WebTestCase
 {
 
     private KernelBrowser|null $client = null;
+
     private UserRepository|null $userRepository = null;
-    private TaskRepository|null $taskRepository = null;
+
+    /**
+     * user with ROLE_USER
+     *
+     * @var User|null
+     */
     private User|null $user = null;
+
+    /**
+     * user with ROLE_USER to be upgraded towards ROLE_ADMIN
+     *
+     * @var User|null
+     */
     private User|null $userToUpgrade = null;
+
+    /**
+     * user with ROLE_ADMIN
+     *
+     * @var User|null
+     */
     private User|null $userAdmin = null;
-    private User|null $userAnonyme = null;
 
     public function setUp(): void
     {
         $this->client = static::createClient();
         $this->userRepository = static::getContainer()->get(UserRepository::class);
-        $this->taskRepository = static::getContainer()->get(TaskRepository::class);
         $this->user = $this->userRepository->findOneByEmail('testuser1@test.com');
         $this->userToUpgrade = $this->userRepository->findOneByEmail('testuser0@test.com');
         $this->userAdmin = $this->userRepository->findOneByEmail('testuser2@test.com');
-        $this->userAnonyme = $this->userRepository->findOneBy(['username' => 'anonyme']);
 
     }
+
 
     /**
      * test the access control to the user list
@@ -40,10 +56,6 @@ class UserControllerTest extends WebTestCase
      */
     public function testUserListAccess()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // ROLE_USER user.
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
         $this->client->loginUser($this->user);
         $this->client->request('GET', 'users/list');
         $this->assertResponseStatusCodeSame(403);
@@ -53,9 +65,6 @@ class UserControllerTest extends WebTestCase
 
     public function testList()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // $user = $userRepository->findOneByEmail('testuser2@test.com');
         $this->client->loginUser($this->userAdmin);
         $this->client->request('GET', 'users/list');
         $this->assertResponseIsSuccessful();
@@ -64,6 +73,7 @@ class UserControllerTest extends WebTestCase
 
     }
 
+
     /**
      * test the access control to create an account
      *
@@ -71,16 +81,14 @@ class UserControllerTest extends WebTestCase
      */
     public function testUserCreate()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // // ROLE_USER user.
-        // $user = $userRepository->findOneByEmail('testuser1@test.com');
         $this->client->loginUser($this->user);
         $this->client->request('GET', 'users/create');
         $this->assertResponseRedirects('/');
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-danger', "Oops ! Vous avez déjà un compte.");
+
     }
+
 
     /**
      * creating an user account
@@ -89,10 +97,6 @@ class UserControllerTest extends WebTestCase
      */
     public function testUserCreateForm()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // ROLE_ADMIN user.
-        // $user = $userRepository->findOneByEmail('testuser2@test.com');
         $this->client->loginUser($this->userAdmin);
         $crawler = $this->client->request('GET', '/users/create');
         $button = $crawler->selectButton('Ajouter');
@@ -112,6 +116,7 @@ class UserControllerTest extends WebTestCase
 
     }
 
+
     /**
      * A ROLE_ADMIN can upgrade a role
      *
@@ -119,11 +124,6 @@ class UserControllerTest extends WebTestCase
      */
     public function testToggleRole()
     {
-        // $client = static::createClient();
-        // $userRepository = static::getContainer()->get(UserRepository::class);
-        // // ROLE_ADMIN user.
-        // $user = $userRepository->findOneByEmail('testuser2@test.com');
-        // $userToUpgrade = $userRepository->findOneByEmail('testuser0@test.com');
         $urlId = $this->userToUpgrade->getId();
         $this->client->loginUser($this->userAdmin);
         $crawler = $this->client->request('GET', sprintf('/users/%s/toggle', $urlId));
