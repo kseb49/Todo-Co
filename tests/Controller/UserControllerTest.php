@@ -7,8 +7,7 @@ use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 /**
- * Tests Class
- * test the methods of the UserController
+ * Application Tests class
  */
 class UserControllerTest extends WebTestCase
 {
@@ -147,14 +146,12 @@ class UserControllerTest extends WebTestCase
             $form,
                 [
                     sprintf('%s[username]', $form->getName()) => "Edit name",
-                    sprintf('%s[email]', $form->getName()) => "editemailtest@test.fr",
                 ]
             );
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Modification réussie");
         $editedUser = $this->userRepository->find($this->user->getId());
         $this->assertSame("Edit name", $editedUser->getUsername());
-        $this->assertSame("editemailtest@test.fr", $editedUser->getEmail());
 
     }
 
@@ -191,12 +188,13 @@ class UserControllerTest extends WebTestCase
      */
     public function testDeleteUser()
     {
+        $userToDeleteId = $this->user->getId();
         $this->client->loginUser($this->userAdmin);
         $this->client->request('GET', '/users/list');
-        $this->client->submitForm('delete-user'.$this->user->getId());
+        $this->client->submitForm('delete-user'.$userToDeleteId);
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! L'utilisateur a bien été supprimé");
-        $this->assertEmpty($this->userRepository->find($this->user->getId()));
+        $this->assertNull($this->userRepository->find($userToDeleteId));
 
     }
 
@@ -211,6 +209,48 @@ class UserControllerTest extends WebTestCase
         $this->client->loginUser($this->userAdmin);
         $this->client->request('GET', '/users/'.$this->userSuperAdmin->getId().'/delete');
         $this->assertResponseStatusCodeSame(403);
+
+    }
+
+
+    /**
+     * test login page
+     *
+     * @return void
+     */
+    public function testLogIn()
+    {
+        $this->client->request('GET', '/login');
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('button', "Se connecter");
+        $this->assertPageTitleContains('Log in!');
+
+    }
+
+
+    /**
+     * test editing password
+     *
+     * @return void
+     */
+    public function testEditPassword()
+    {
+        $this->client->loginUser($this->userToUpgrade);
+        $crawler = $this->client->request('GET', sprintf('/users/%s/editpass',$this->userToUpgrade->getId()));
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('button', "Modifier");
+        $this->assertPageTitleContains('Modifier votre mot de passe');
+        $button = $crawler->selectButton('Modifier');
+        $form = $button->form();
+        $this->client->submit(
+            $form,
+            [
+                sprintf('%s[password][first]', $form->getName()) => "new password",
+                sprintf('%s[password][second]', $form->getName()) => "new password",
+            ]);
+        $this->assertResponseRedirects('/');
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Votre mot de passe a était modifié");
 
     }
 

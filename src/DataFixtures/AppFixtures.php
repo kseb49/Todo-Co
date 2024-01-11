@@ -11,10 +11,12 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class AppFixtures extends Fixture
 {
 
+
     public function __construct(private UserPasswordHasherInterface $passwordHasher)
     {
 
     }
+
 
     /**
      * Create 50 users
@@ -25,8 +27,11 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
-        $roles = [['ROLE_ADMIN'], ['ROLE_USER']];
-        for ($i=0; $i < 48; $i++) {
+        $roles = [
+            ['ROLE_ADMIN'],
+            ['ROLE_USER'],
+        ];
+        for ($i =0; $i < 48; $i++) {
             $user = new User;
             $user->setEmail($faker->email());
             $user->setRoles($faker->randomElement($roles));
@@ -34,6 +39,7 @@ class AppFixtures extends Fixture
             $user->setPassword($this->passwordHasher->hashPassword($user, '123456'));
             $manager->persist($user);
         }
+
         // Anonymous user.
         $anonymousUser = new User;
         $anonymousUser->setEmail('fake@anonyme.com');
@@ -50,6 +56,7 @@ class AppFixtures extends Fixture
         $superUser->setPassword($this->passwordHasher->hashPassword($user, '123456'));
         $manager->persist($superUser);
         $manager->flush();
+
     }
 
 

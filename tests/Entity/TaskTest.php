@@ -14,6 +14,7 @@ class TaskTest extends TestCase
     {
         $task = new Task();
         $this->assertIsBool($task->isDone());
+
     }
 
 
@@ -34,6 +35,7 @@ class TaskTest extends TestCase
             [TRUE],
             [FALSE],
         ];
+
     }
 
 
@@ -42,6 +44,7 @@ class TaskTest extends TestCase
         $task = new Task();
         $task->setCreatedAt();
         $this->assertInstanceOf(DateTime::class, $task->getCreatedAt());
+
     }
 
 
@@ -51,5 +54,8 @@ class TaskTest extends TestCase
         $user = $this->createStub(User::class);
         $task->setUser($user);
         $this->assertSame($user, $task->getUser());
+
     }
+
+
 }

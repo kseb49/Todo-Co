@@ -9,8 +9,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
- * Tests class
- * test the methods of the TaskController
+ * Application Tests class
  */
 class TaskControllerTest extends WebTestCase
 {

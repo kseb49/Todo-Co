@@ -23,17 +23,32 @@ class UserController extends AbstractController
 
 
     #[Route('/list', name:'user_list')]
+    /**
+     * Display the users list page
+     *
+     * @param UserRepository $users
+     * @return Response
+     */
     public function list(UserRepository $users): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
+
     }
 
 
     #[Route('/create', name:'user_create')]
-    public function create(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em): Response
+    /**
+     * Create a user account
+     *
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
+    public function create(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
-        if($this->getUser() && $this->isGranted('ROLE_ADMIN') === false) {
+        if ($this->getUser() && $this->isGranted('ROLE_ADMIN') === false) {
             $this->addFlash('error', "Vous avez déjà un compte.");
             return $this->redirectToRoute('homepage');
         }
@@ -43,12 +58,13 @@ class UserController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
-            if($form->get('roles')->getData() === true) {
+            if ($form->get('roles')->getData() === true) {
                 $this->denyAccessUnlessGranted('ROLE_ADMIN', message:"Vous n'êtes pas autorisé à changer les droits de cet utilisateurs");
                 $user->setRoles(['ROLE_ADMIN']);
             }
-            $em->persist($user);
-            $em->flush();
+
+            $entityManager->persist($user);
+            $entityManager->flush();
             $this->addFlash('success', "L'utilisateur a bien été ajouté.");
             return $this->redirectToRoute('homepage');
         }
@@ -58,14 +74,22 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/edit', name:'user_edit')]
-    public function edit(User $user, Request $request, EntityManagerInterface $em): Response
+    /**
+     * Edit a user account
+     *
+     * @param User $user
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
+    public function edit(User $user, Request $request, EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditUserForm::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() === true && $form->isValid() === true) {
-            $em->persist($user);
-            $em->flush();
+            $entityManager->persist($user);
+            $entityManager->flush();
             $this->addFlash('success', "Modification réussie");
             return $this->redirectToRoute('homepage');
         }
@@ -76,7 +100,15 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/toggle', name:'user_toggle_role')]
-    public function toggleRole(User $user, EntityManagerInterface $em, Request $request): Response
+    /**
+     * Toggle a user role ROLE_USER to ROLE_ADMIN or ROLE_ADMIN to ROLE_USER
+     *
+     * @param User $user
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @return Response
+     */
+    public function toggleRole(User $user, EntityManagerInterface $entityManager, Request $request): Response
     {
         $this->denyAccessUnlessGranted('authorize', subject : $user, message: "Vous n'êtes pas autorisé à changer les droits de cet utilisateurs");
         $form = $this->createForm(ToggleRoleForm::class, $user);
@@ -84,18 +116,18 @@ class UserController extends AbstractController
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             if ($form->get('roles')->getData() !== false) {
                 switch ($user->getRoles()[0]) {
-                    case 'ROLE_ADMIN':
-                        $user->setRoles([]);
-                        break;
-                    case 'ROLE_USER':
-                        $user->setRoles(['ROLE_ADMIN']);
-                        break;
-                    default:
-                        $this->addFlash('error', "Erreur");
-                        return $this->redirectToRoute('user_list');
-                    }
-                $em->persist($user);
-                $em->flush();
+                case 'ROLE_ADMIN':
+                    $user->setRoles([]);
+                    break;
+                case 'ROLE_USER':
+                    $user->setRoles(['ROLE_ADMIN']);
+                    break;
+                default:
+                    $this->addFlash('error', "Erreur");
+                    return $this->redirectToRoute('user_list');
+                }
+                $entityManager->persist($user);
+                $entityManager->flush();
                 $this->addFlash('success', "Le rôle a bien était modifié");
                 return $this->redirectToRoute('user_list');
             }
@@ -107,15 +139,24 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/editpass', name:'user_password_change')]
-    public function editPassword(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $em): Response
+    /**
+     * user Password change 
+     *
+     * @param User $user
+     * @param Request $request
+     * @param UserPasswordHasherInterface $userPasswordHasher
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
+    public function editPassword(User $user, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditPasswordForm::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
-            $em->persist($user);
-            $em->flush();
+            $entityManager->persist($user);
+            $entityManager->flush();
             $this->addFlash('success', "Votre mot de passe a était modifié");
             return $this->redirectToRoute('homepage');
         }
@@ -126,22 +167,33 @@ class UserController extends AbstractController
 
 
     #[Route('/{id}/delete', name:'user_delete')]
-    public function delete(User $user, EntityManagerInterface $em, Request $request, UserRepository $anonymous) : RedirectResponse
+    /**
+     * Delete an user account
+     *
+     * @param User $user
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @param UserRepository $anonymous
+     * @return RedirectResponse
+     */
+    public function delete(User $user, EntityManagerInterface $entityManager, Request $request, UserRepository $anonymous) : RedirectResponse
     {
         $this->denyAccessUnlessGranted('delete', $user);
         $token = $request->request->get('token');
         if ($this->isCsrfTokenValid('delete-item', $token)) {
-            $task = $em->getRepository(Task::class);
+            $task = $entityManager->getRepository(Task::class);
             $tasks = $task->findByUsers($user->getId());
             $anonymousUser = $anonymous->findOneBy(['username' => 'anonyme']);
             foreach ($tasks as $task) {
                 $task->setUser($anonymousUser);
             }
-            $em->remove($user);
-            $em->flush();
+            $entityManager->remove($user);
+            $entityManager->flush();
             $this->addFlash('success', "L'utilisateur a bien été supprimé");
             return $this->redirectToRoute('user_list');
         }
 
     }
+
+
 }

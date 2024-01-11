@@ -15,7 +15,7 @@ class Task
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id =null;
+    private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt;
@@ -51,21 +51,26 @@ class Task
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+
     public function __construct()
     {
         $this->createdAt = new \Datetime();
         $this->isDone = false;
+
     }
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
+
 
     public function setCreatedAt(\DateTimeInterface $createdAt = new DateTime()): static
     {
@@ -73,10 +78,12 @@ class Task
         return $this;
     }
 
+
     public function getTitle(): ?string
     {
         return $this->title;
     }
+
 
     public function setTitle(string $title): static
     {
@@ -84,10 +91,12 @@ class Task
         return $this;
     }
 
+
     public function getContent(): ?string
     {
         return $this->content;
     }
+
 
     public function setContent(string $content): static
     {
@@ -95,10 +104,12 @@ class Task
         return $this;
     }
 
+
     public function isDone(): ?bool
     {
         return $this->isDone;
     }
+
 
     public function toggle(bool $flag): static
     {
@@ -106,15 +117,18 @@ class Task
         return $this;
     }
 
+
     public function getUser(): ?User
     {
         return $this->user;
     }
 
+
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
+
+
 }

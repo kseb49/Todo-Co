@@ -15,6 +15,7 @@ class UserTest extends TestCase
         $user = new User();
         $user->setEmail($email);
         $this->assertSame($email, $user->getEmail());
+
     }
 
 
@@ -24,6 +25,7 @@ class UserTest extends TestCase
         $user = new User();
         $user->setRoles($role);
         $this->assertSame($roles, $user->getRoles());
+
     }
 
 
@@ -33,6 +35,7 @@ class UserTest extends TestCase
         $user = new User();
         $user->setUsername($name);
         $this->assertSame($name, $user->getUsername());
+
     }
 
 
@@ -40,6 +43,7 @@ class UserTest extends TestCase
     {
         $user = new User();
         $this->assertInstanceOf(Collection::class, $user->getTask());
+
     }
 
 
@@ -50,6 +54,7 @@ class UserTest extends TestCase
             ['fakeemail@email.com'],
             ['john@doe.com'],
         ];
+
     }
 
 
@@ -60,6 +65,7 @@ class UserTest extends TestCase
             [['ROLE_ADMIN'], ['ROLE_ADMIN', 'ROLE_USER']],
             [[], ['ROLE_USER']],
         ];
+
     }
 
 
@@ -70,6 +76,7 @@ class UserTest extends TestCase
             ['john'],
             ['jane'],
         ];
+
     }
 
 }

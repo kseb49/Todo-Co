@@ -65,9 +65,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Task::class)]
     private Collection $task;
 
+
     public function __construct()
     {
         $this->task = new ArrayCollection();
+
     }
 
 
@@ -108,7 +110,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
+        // Guarantee every user at least has ROLE_USER.
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
@@ -145,7 +147,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
+        // If you store any temporary, sensitive data on the user, clear it here.
         // $this->plainPassword = null;
     }
 
@@ -159,7 +161,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
-
         return $this;
     }
 
@@ -173,7 +174,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function addTask(task $task): static
     {
-        if (!$this->task->contains($task)) {
+        if ($this->task->contains($task) === false) {
             $this->task->add($task);
             $task->setUser($this);
         }
@@ -183,8 +184,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeTask(task $task): static
     {
-        if ($this->task->removeElement($task)) {
-            // set the owning side to null (unless already changed)
+        if ($this->task->removeElement($task) === true) {
+            // Set the owning side to null (unless already changed).
             if ($task->getUser() === $this) {
                 $task->setUser(null);
             }
