@@ -181,16 +181,28 @@ class UserControllerTest extends WebTestCase
     }
 
 
-    public static function userProvider(): array
+    /**
+     * A ROLE_SUPER_ADMIN can downgrade a role
+     *
+     * @return void
+     */
+    public function testDowngrade()
     {
-        $user = $this->userSuperAdmin;
-        return
-        [
-            [$this->userSuperAdmin],
-            [$this->userAdmin],
-        ];
+        $urlId = $this->userToUpgrade->getId();
+        $this->client->loginUser($this->userSuperAdmin);
+        $crawler = $this->client->request('GET', sprintf('/users/%s/toggle', $urlId));
+        $button = $crawler->selectButton('Modifier');
+        $form = $button->form();
+        $form[sprintf('%s[roles]', $form->getName())]->tick();
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/users/list');
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Le rôle a bien était modifié");
+        $this->assertTrue(in_array('ROLE_USER', $this->userRepository->findOneByEmail('testuser0@test.com')->getRoles()));
 
     }
+
+
     /**
      * ROLE_ADMIN can Delete a user account
      *

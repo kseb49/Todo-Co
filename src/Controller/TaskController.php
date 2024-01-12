@@ -102,15 +102,20 @@ class TaskController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @return RedirectResponse
      */
-    public function toggle(Task $task, EntityManagerInterface $entityManager): RedirectResponse
+    public function toggle(Task $task, EntityManagerInterface $entityManager, Request $request): RedirectResponse
     {
         $this->denyAccessUnlessGranted('toggle', $task, "Seul le créateur de la tâche peut en changer son état");
-        $task->toggle(!$task->isDone());
-        $entityManager->flush();
-        $message = $task->isDone() === true ? "terminée" : "en cours";
-        $this->addFlash('success', sprintf('La tâche %s a bien été marquée %s.', $task->getTitle(), $message));
-        return $this->redirectToRoute('task_list');
+        $submittedToken = $request->request->get('token');
+        if ($this->isCsrfTokenValid('toggle-state', $submittedToken) === true) {
+            $task->toggle(!$task->isDone());
+            $entityManager->flush();
+            $message = $task->isDone() === true ? "terminée" : "en cours";
+            $this->addFlash('success', sprintf('La tâche %s a bien été marquée %s.', $task->getTitle(), $message));
+            return $this->redirectToRoute('task_list');
+        }
 
+        $this->addFlash('error', "Vous n'êtes pas autorisé à modifier cette tâche");
+        return $this->redirectToRoute('task_list');
     }
 
 

@@ -5,6 +5,7 @@ namespace App\Tests\Entity;
 use App\Entity\User;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -155,6 +156,29 @@ class TaskControllerTest extends WebTestCase
         $editedTask = $this->taskRepository->find($param);
         $this->assertSame("Edited title", $editedTask->getTitle());
         $this->assertSame("edited content", $editedTask->getContent());
+
+    }
+
+
+    public function testToggleState()
+    {
+        for ($i=0; $i < 2 ; $i++) { 
+            $this->client->loginUser($this->user);
+            $this->client->request('GET', '/tasks');
+            $task = $this->taskRepository->findOneBy(['user' => $this->user]);
+            $taskState = $task->isDone();
+            if($taskState) {
+                $text = sprintf("Superbe ! La tâche %s a bien été marquée en cours.", $task->getTitle());
+            }
+            if(!$taskState) {
+                $text = sprintf("Superbe ! La tâche %s a bien été marquée terminée.", $task->getTitle());
+            }
+
+            $this->client->submitForm('toggle'.$task->getId());
+            $this->client->followRedirect();
+            $this->assertSelectorTextContains('div.alert.alert-success', $text);
+
+        }
 
     }
 

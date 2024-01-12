@@ -8,13 +8,18 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
 
 class EditPasswordForm extends AbstractType
 {
+
+
     public function buildForm(FormBuilderInterface $builder, array $options) :void
     {
         $builder
-            ->add('password', RepeatedType::class,
+            ->add(
+                'password',
+                RepeatedType::class,
                 [
                     'type' => PasswordType::class,
                     'invalid_message' => 'Les deux mots de passe doivent correspondre.',
@@ -26,7 +31,7 @@ class EditPasswordForm extends AbstractType
 
     }
 
-
+    #[CodeCoverageIgnore]
     public function configureOptions(OptionsResolver $resolver) :void
     {
         $resolver->setDefaults(
@@ -38,4 +43,6 @@ class EditPasswordForm extends AbstractType
         );
 
     }
+
+
 }
