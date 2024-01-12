@@ -181,6 +181,16 @@ class UserControllerTest extends WebTestCase
     }
 
 
+    public static function userProvider(): array
+    {
+        $user = $this->userSuperAdmin;
+        return
+        [
+            [$this->userSuperAdmin],
+            [$this->userAdmin],
+        ];
+
+    }
     /**
      * ROLE_ADMIN can Delete a user account
      *

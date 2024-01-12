@@ -118,6 +118,8 @@ class TaskControllerTest extends WebTestCase
         );
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a été bien été ajoutée.");
+        $taskUserId = $this->taskRepository->findOneBy(['title' => "Une tâche de test"])->getUser()->getId();
+        $this->assertSame($this->user->getId(), $taskUserId);
 
     }
 

@@ -58,4 +58,19 @@ class TaskTest extends TestCase
     }
 
 
+    public function testAddTask()
+    {
+        $task = new Task();
+        $user = $this->createStub(User::class);
+        $task->setUser($user);
+        $task->setContent('new content');
+        $task->setTitle('new title');
+        $this->assertSame('new content', $task->getContent());
+        $this->assertSame('new title', $task->getTitle());
+        $this->assertInstanceOf(DateTime::class, $task->getCreatedAt());
+        $this->assertInstanceOf(User::class, $user);
+
+    }
+
+
 }
