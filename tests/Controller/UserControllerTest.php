@@ -28,7 +28,7 @@ class UserControllerTest extends WebTestCase
      *
      * @var User|null
      */
-    private User|null $userToUpgrade = null;
+    private User|null $userToToggle = null;
 
     /**
      * user with ROLE_ADMIN
@@ -50,7 +50,7 @@ class UserControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->userRepository = static::getContainer()->get(UserRepository::class);
         $this->user = $this->userRepository->findOneByEmail('testuser1@test.com');
-        $this->userToUpgrade = $this->userRepository->findOneByEmail('testuser0@test.com');
+        $this->userToToggle = $this->userRepository->findOneByEmail('testuser0@test.com');
         $this->userAdmin = $this->userRepository->findOneByEmail('testuser2@test.com');
         $this->userSuperAdmin = $this->userRepository->findOneByEmail('testuser3@test.com');
 
@@ -91,9 +91,7 @@ class UserControllerTest extends WebTestCase
     {
         $this->client->loginUser($this->user);
         $this->client->request('GET', 'users/create');
-        $this->assertResponseRedirects('/');
-        $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-danger', "Oops ! Vous avez déjà un compte.");
+        $this->assertResponseStatusCodeSame(403);
 
     }
 
@@ -163,7 +161,7 @@ class UserControllerTest extends WebTestCase
      */
     public function testToggleRole()
     {
-        $urlId = $this->userToUpgrade->getId();
+        $urlId = $this->userToToggle->getId();
         $this->client->loginUser($this->userAdmin);
         $crawler = $this->client->request('GET', sprintf('/users/%s/toggle', $urlId));
         $this->assertResponseIsSuccessful();
@@ -188,7 +186,7 @@ class UserControllerTest extends WebTestCase
      */
     public function testDowngrade()
     {
-        $urlId = $this->userToUpgrade->getId();
+        $urlId = $this->userToToggle->getId();
         $this->client->loginUser($this->userSuperAdmin);
         $crawler = $this->client->request('GET', sprintf('/users/%s/toggle', $urlId));
         $button = $crawler->selectButton('Modifier');
@@ -198,6 +196,30 @@ class UserControllerTest extends WebTestCase
         $this->assertResponseRedirects('/users/list');
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Le rôle a bien était modifié");
+        $this->assertTrue(in_array('ROLE_USER', $this->userRepository->findOneByEmail('testuser0@test.com')->getRoles()));
+
+    }
+
+
+    /**
+     * Test the case the checkbox is not ticked
+     *
+     * @return void
+     */
+    public function testToggleRoleBlank()
+    {
+        $urlId = $this->userToToggle->getId();
+        $this->client->loginUser($this->userAdmin);
+        $crawler = $this->client->request('GET', sprintf('/users/%s/toggle', $urlId));
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', "Modifier les droits");
+        $this->assertPageTitleContains('Modifier droits');
+        $button = $crawler->selectButton('Modifier');
+        $form = $button->form();
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/users/list');
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-danger', "Vous n'avez pas modifié les droits de ce compte");
         $this->assertTrue(in_array('ROLE_USER', $this->userRepository->findOneByEmail('testuser0@test.com')->getRoles()));
 
     }
@@ -236,6 +258,30 @@ class UserControllerTest extends WebTestCase
 
 
     /**
+     * Test the csrf protection
+     *
+     * @return void
+     */
+    public function testDeleteUserCsrf()
+    {
+        $userToDeleteId = $this->userToToggle->getId();
+        $this->client->loginUser($this->userAdmin);
+        $crawler = $this->client->request('GET', '/users/list');
+        $button = $crawler->filter('#delete-user'.$userToDeleteId);
+        $form = $button->form();
+        $this->client->submit(
+            $form,
+                [
+                    'token' => "dummy token",
+                ]
+            );
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-danger', "Vous n'êtes pas autorisé à supprimer ce compte");
+
+    }
+
+
+    /**
      * test login page
      *
      * @return void
@@ -251,14 +297,28 @@ class UserControllerTest extends WebTestCase
 
 
     /**
+     * test redirection if already login
+     *
+     * @return void
+     */
+    public function testLogInRedirection()
+    {
+        $this->client->loginUser($this->userAdmin);
+        $this->client->request('GET', '/login');
+        $this->assertResponseRedirects('/');
+
+    }
+
+
+    /**
      * test editing password
      *
      * @return void
      */
     public function testEditPassword()
     {
-        $this->client->loginUser($this->userToUpgrade);
-        $crawler = $this->client->request('GET', sprintf('/users/%s/editpass',$this->userToUpgrade->getId()));
+        $this->client->loginUser($this->userToToggle);
+        $crawler = $this->client->request('GET', sprintf('/users/%s/editpass',$this->userToToggle->getId()));
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('button', "Modifier");
         $this->assertPageTitleContains('Modifier votre mot de passe');

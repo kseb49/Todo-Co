@@ -48,9 +48,12 @@ class UserController extends AbstractController
      */
     public function create(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
-        if ($this->getUser() && $this->isGranted('ROLE_ADMIN') === false) {
-            $this->addFlash('error', "Vous avez déjà un compte.");
-            return $this->redirectToRoute('homepage');
+        if ($this->getUser() !== null) {
+            $this->denyAccessUnlessGranted('create', $this->getUser());
+        }
+
+        if ($this->getUser() === null) {
+            $this->denyAccessUnlessGranted('create');
         }
 
         $user = new User();
@@ -59,7 +62,8 @@ class UserController extends AbstractController
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
             if ($form->get('roles')->getData() === true) {
-                $this->denyAccessUnlessGranted('ROLE_ADMIN', message:"Vous n'êtes pas autorisé à changer les droits de cet utilisateurs");
+                // Will redirect on login page if not connected
+                $this->denyAccessUnlessGranted('ROLE_ADMIN');
                 $user->setRoles(['ROLE_ADMIN']);
             }
 
@@ -126,15 +130,19 @@ class UserController extends AbstractController
                     $this->addFlash('error', "Erreur");
                     return $this->redirectToRoute('user_list');
                 }
+
                 $entityManager->persist($user);
                 $entityManager->flush();
                 $this->addFlash('success', "Le rôle a bien était modifié");
                 return $this->redirectToRoute('user_list');
             }
+
             $this->addFlash('error', "Vous n'avez pas modifié les droits de ce compte");
             return $this->redirectToRoute('user_list');
         }
+
         return $this->render('user/toggle.html.twig', ['form' => $form->createView(), 'user' => $user]);
+
     }
 
 
@@ -192,6 +200,9 @@ class UserController extends AbstractController
             $this->addFlash('success', "L'utilisateur a bien été supprimé");
             return $this->redirectToRoute('user_list');
         }
+
+        $this->addFlash('error', "Vous n'êtes pas autorisé à supprimer ce compte");
+        return $this->redirectToRoute('user_list');
 
     }
 

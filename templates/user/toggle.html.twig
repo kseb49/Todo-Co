@@ -6,6 +6,8 @@
 {% block body %}
     <div class="row">
         {{ form_start(form, {'action' : path('user_toggle_role', {'id' : user.id})}) }}
+        {{ form_errors(form) }}
+        {# {{form_errors(form.token)}} #}
             {% if is_granted('ROLE_ADMIN')%}
                 {% for role in user.roles %}
                     {# role > ROLE_USER #}
