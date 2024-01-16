@@ -22,9 +22,12 @@ class SecurityControllerAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
+
     public function __construct(private UrlGeneratorInterface $urlGenerator)
     {
+
     }
+
 
     public function authenticate(Request $request): Passport
     {
@@ -36,11 +39,13 @@ class SecurityControllerAuthenticator extends AbstractLoginFormAuthenticator
             new UserBadge($email),
             new PasswordCredentials($request->request->get('password', '')),
             [
-                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
-                new RememberMeBadge(),
+             new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+             new RememberMeBadge(),
             ]
         );
+
     }
+
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
@@ -50,11 +55,16 @@ class SecurityControllerAuthenticator extends AbstractLoginFormAuthenticator
 
         // For example:
         return new RedirectResponse($this->urlGenerator->generate('homepage'));
-        // throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
+
+        // Throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
     }
+
 
     protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
+
     }
+
+
 }

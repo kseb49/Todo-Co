@@ -23,7 +23,7 @@ class TasksFixtures extends Fixture
         $users = $manager->getRepository(User::class)->findAll();
         $faker = Factory::create('fr_FR');
         for ($i =0; $i < 100; $i++) {
-            $task =new Task();
+            $task = new Task();
             $task->setTitle('Tache n°'.$i);
             $task->setContent($faker->text(35));
             $task->setCreatedAt($faker->dateTime());
