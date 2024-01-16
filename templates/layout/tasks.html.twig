@@ -10,7 +10,7 @@
         </div>
         <div>
         {% if app.user == task.user  or task.user.username == 'anonyme'%}
-            <form action="{{ path('task_toggle', {'id' : task.id }) }}">
+            <form action="{{ path('task_toggle', {'id' : task.id }) }}" method = "post">
              <input type="hidden" name="token" value={{csrf_token('toggle-state')}}>
                 <button class="btn btn-success btn-sm pull-right" id="toggle{{task.id}}">
                 {% if not task.isDone %}Marquer comme faite{% else %}Marquer non terminée{% endif %}

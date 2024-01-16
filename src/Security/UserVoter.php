@@ -13,7 +13,7 @@ class UserVoter extends Voter
     const EDIT = 'edit';
     const AUTH = 'authorize';
     const DEL = 'delete';
-    const CREATE = 'create';
+    // const CREATE = 'create';
 
 
     public function __construct(
@@ -25,7 +25,7 @@ class UserVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject) :bool
     {
-        if (in_array($attribute, [self::EDIT, self::AUTH, self::DEL, self::CREATE]) === false) {
+        if (in_array($attribute, [self::EDIT, self::AUTH, self::DEL]) === false) {
             return false;
         }
 
@@ -43,19 +43,19 @@ class UserVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        if ($attribute !== self::CREATE) {
-            $user = $token->getUser();
-            if (!$user instanceof User) {
-                return false;
-            }
-            $account = $subject;
+        $user = $token->getUser();
+        if (!$user instanceof User) {
+            return false;
         }
+        // if ($attribute !== self::CREATE) {
+            $account = $subject;
+        // }
 
         return match ($attribute) {
             self::EDIT => $this->canEdit($account, $user),
             self::AUTH => $this->canAuthorize($account, $user),
             self::DEL => $this->canDelete($account, $user),
-            self::CREATE => $this->canCreate($subject),
+            // self::CREATE => $this->canCreate($subject),
             default => throw new Exception('Erreur'),
         };
 

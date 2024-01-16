@@ -49,12 +49,12 @@ class UserController extends AbstractController
     public function create(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
         if ($this->getUser() !== null) {
-            $this->denyAccessUnlessGranted('create', $this->getUser());
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
         }
 
-        if ($this->getUser() === null) {
-            $this->denyAccessUnlessGranted('create');
-        }
+        // if ($this->getUser() === null) {
+        //     $this->denyAccessUnlessGranted('create');
+        // }
 
         $user = new User();
         $form = $this->createForm(UserForm::class, $user);
