@@ -269,12 +269,13 @@ class UserControllerTest extends WebTestCase
         $form = $button->form();
         $this->client->submit(
             $form,
-                [
-                    'token' => "dummy token",
-                ]
-            );
+            ['token' => "dummy token"]
+        );
         $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-danger', "Vous n'êtes pas autorisé à supprimer ce compte");
+        $this->assertSelectorTextContains(
+            'div.alert.alert-danger',
+            "Vous n'êtes pas autorisé à supprimer ce compte",
+        );
 
     }
 
@@ -330,7 +331,10 @@ class UserControllerTest extends WebTestCase
             ]);
         $this->assertResponseRedirects('/');
         $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Votre mot de passe a était modifié");
+        $this->assertSelectorTextContains(
+            'div.alert.alert-success',
+            "Superbe ! Votre mot de passe a était modifié",
+        );
 
     }
 

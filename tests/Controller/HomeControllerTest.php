@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
  */
 class HomeControllerTest extends WebTestCase
 {
+
     private KernelBrowser|null $client = null;
 
     private UserRepository|null $userRepository = null;
