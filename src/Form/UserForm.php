@@ -34,22 +34,22 @@ class UserForm extends AbstractType
                 'password',
                 RepeatedType::class,
                 [
-                    'type' => PasswordType::class,
-                    'invalid_message' => 'Les deux mots de passe doivent correspondre.',
-                    'required' => true,
-                    'first_options'  => ['label' => 'Mot de passe'],
-                    'second_options' => ['label' => 'Tapez le mot de passe à nouveau'],
+                 'type' => PasswordType::class,
+                 'invalid_message' => 'Les deux mots de passe doivent correspondre.',
+                 'required' => true,
+                 'first_options'  => ['label' => 'Mot de passe'],
+                 'second_options' => ['label' => 'Tapez le mot de passe à nouveau'],
                 ]
             )
             ->add(
                 'roles',
                 CheckboxType::class,
                 [
-                    'label' => 'Rôle Administrateur ?',
-                    'help' => 'Cocher la case pour accorder les droits administrateurs à cette utilisateur',
-                    'required' => false,
-                    'value' => false,
-                    'mapped' => false,
+                 'label' => 'Rôle Administrateur ?',
+                 'help' => 'Cocher la case pour accorder les droits administrateurs à cette utilisateur',
+                 'required' => false,
+                 'value' => false,
+                 'mapped' => false,
                 ]
             );
 
@@ -61,9 +61,9 @@ class UserForm extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => User::class,
-                // Comment me to reactivate the html5 validation!.
-                'attr' => ['novalidate' => 'novalidate'],
+             'data_class' => User::class,
+             // Comment me to reactivate the html5 validation!.
+             'attr' => ['novalidate' => 'novalidate'],
             ]
         );
 

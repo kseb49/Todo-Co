@@ -44,7 +44,7 @@ class TaskVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        // Check if the user is connected
+        // Check if the user is connected.
         $user = $token->getUser();
         if (!$user instanceof User) {
             return false;
@@ -60,6 +60,7 @@ class TaskVoter extends Voter
             default => throw new Exception('Erreur'),
         };
         return true;
+
     }
 
 
@@ -69,7 +70,7 @@ class TaskVoter extends Voter
             return true;
         }
 
-        if ($task->getUser()->getUsername() == 'anonyme' && $this->security->isGranted('ROLE_ADMIN')) {
+        if ($task->getUser()->getUsername() === 'anonyme' && $this->security->isGranted('ROLE_ADMIN')) {
             return true;
         }
 
@@ -84,11 +85,13 @@ class TaskVoter extends Voter
 
     }
 
+
     private function canDelete(Task $task, $user) :bool
     {
         return $this->canToggle($task, $user);
 
     }
+
 
     private function canCreate()
     {
