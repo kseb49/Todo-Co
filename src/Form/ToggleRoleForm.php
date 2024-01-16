@@ -20,24 +20,25 @@ class ToggleRoleForm extends AbstractType
                 'roles',
                 CheckboxType::class,
                 [
-                    'label' => 'Rôle Administrateur ?',
-                    'help' => 'Cocher la case pour accorder les droits administrateurs à cette utilisateur',
-                    'required' => false,
-                    'mapped' => false,
-                    "value" => true,
+                 'label' => 'Rôle Administrateur ?',
+                 'help' => 'Cocher la case pour accorder les droits administrateurs à cette utilisateur',
+                 'required' => false,
+                 'mapped' => false,
+                 "value" => true,
                 ]
             );
 
     }
+
 
     #[CodeCoverageIgnore]
     public function concompteOptions(OptionsResolver $resolver) :void
     {
         $resolver->setDefaults(
             [
-                'data_class' => User::class,
-                // Comment me to reactivate the html5 validation!.
-                'attr' => ['novalidate' => 'novalidate'],
+             'data_class' => User::class,
+             // Comment me to reactivate the html5 validation!.
+             'attr' => ['novalidate' => 'novalidate'],
             ]
         );
 

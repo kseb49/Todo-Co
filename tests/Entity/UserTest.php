@@ -9,6 +9,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 class UserTest extends TestCase
 {
+
+
     #[DataProvider('emailProvider')]
     public function testSetEmail(string $email)
     {

@@ -162,22 +162,22 @@ class TaskControllerTest extends WebTestCase
 
     public function testToggleState()
     {
-        for ($i=0; $i < 2 ; $i++) { 
+        for ($i =0; $i < 2 ; $i++) {
             $this->client->loginUser($this->user);
             $this->client->request('GET', '/tasks');
             $task = $this->taskRepository->findOneBy(['user' => $this->user]);
             $taskState = $task->isDone();
-            if($taskState) {
+            if ($taskState === true) {
                 $text = sprintf("Superbe ! La tâche %s a bien été marquée en cours.", $task->getTitle());
             }
-            if(!$taskState) {
+
+            if ($taskState === false) {
                 $text = sprintf("Superbe ! La tâche %s a bien été marquée terminée.", $task->getTitle());
             }
 
             $this->client->submitForm('toggle'.$task->getId());
             $this->client->followRedirect();
             $this->assertSelectorTextContains('div.alert.alert-success', $text);
-
         }
 
     }
@@ -272,10 +272,8 @@ class TaskControllerTest extends WebTestCase
         $form = $button->form();
         $this->client->submit(
             $form,
-                [
-                    'token' => "dummy token",
-                ]
-            );
+            ['token' => "dummy token"]
+        );
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-danger', "Vous n'êtes pas autorisé à supprimer cette tâche");
 

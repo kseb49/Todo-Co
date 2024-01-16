@@ -17,9 +17,11 @@ class TaskVoter extends Voter
     const CREATE = 'create';
     const EDIT = 'edit';
 
+
     public function __construct(
         private Security $security,
     ) {
+
     }
 
 

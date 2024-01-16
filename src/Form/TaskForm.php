@@ -20,7 +20,8 @@ class TaskForm extends AbstractType
             ->add(
                 'content',
                 TextareaType::class,
-        );
+            );
+
     }
 
 

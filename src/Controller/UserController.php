@@ -62,7 +62,7 @@ class UserController extends AbstractController
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
             if ($form->get('roles')->getData() === true) {
-                // Will redirect on login page if not connected
+                // Will redirect on login page if not connected.
                 $this->denyAccessUnlessGranted('ROLE_ADMIN');
                 $user->setRoles(['ROLE_ADMIN']);
             }
@@ -74,6 +74,7 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/create.html.twig', ['form' => $form]);
+
     }
 
 
@@ -148,7 +149,7 @@ class UserController extends AbstractController
 
     #[Route('/{id}/editpass', name:'user_password_change')]
     /**
-     * user Password change 
+     * user Password change
      *
      * @param User $user
      * @param Request $request
@@ -188,13 +189,14 @@ class UserController extends AbstractController
     {
         $this->denyAccessUnlessGranted('delete', $user);
         $token = $request->request->get('token');
-        if ($this->isCsrfTokenValid('delete-item', $token)) {
+        if ($this->isCsrfTokenValid('delete-item', $token) === true) {
             $task = $entityManager->getRepository(Task::class);
             $tasks = $task->findByUsers($user->getId());
             $anonymousUser = $anonymous->findOneBy(['username' => 'anonyme']);
             foreach ($tasks as $task) {
                 $task->setUser($anonymousUser);
             }
+
             $entityManager->remove($user);
             $entityManager->flush();
             $this->addFlash('success', "L'utilisateur a bien été supprimé");

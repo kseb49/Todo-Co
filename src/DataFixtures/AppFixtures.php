@@ -28,10 +28,10 @@ class AppFixtures extends Fixture
     {
         $faker = Factory::create('fr_FR');
         $roles = [
-            ['ROLE_ADMIN'],
-            ['ROLE_USER'],
-        ];
-        for ($i =0; $i < 48; $i++) {
+                    ['ROLE_ADMIN'],
+                    ['ROLE_USER'],
+                 ];
+        for ($i = 0; $i < 48; $i++) {
             $user = new User;
             $user->setEmail($faker->email());
             $user->setRoles($faker->randomElement($roles));

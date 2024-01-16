@@ -15,14 +15,16 @@ class UserVoter extends Voter
     const DEL = 'delete';
     const CREATE = 'create';
 
+
     public function __construct(
         private Security $security,
     ) {
+
     }
 
 
     protected function supports(string $attribute, mixed $subject) :bool
-    { 
+    {
         if (in_array($attribute, [self::EDIT, self::AUTH, self::DEL, self::CREATE]) === false) {
             return false;
         }
@@ -37,6 +39,7 @@ class UserVoter extends Voter
         return true;
 
     }
+
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
@@ -55,6 +58,7 @@ class UserVoter extends Voter
             self::CREATE => $this->canCreate($subject),
             default => throw new Exception('Erreur'),
         };
+
         return true;
     }
 
@@ -71,15 +75,15 @@ class UserVoter extends Voter
 
     private function canAuthorize(User $account) :bool
     {
-        if(in_array('ROLE_SUPER_ADMIN', $account->getRoles())) {
+        if (in_array('ROLE_SUPER_ADMIN', $account->getRoles())) {
             return false;
         }
 
-        if($this->security->isGranted('ROLE_SUPER_ADMIN')) {
+        if ($this->security->isGranted('ROLE_SUPER_ADMIN')) {
             return true;
         }
 
-        if($this->security->isGranted('ROLE_ADMIN') && in_array('ROLE_ADMIN', $account->getRoles()) === false) {
+        if ($this->security->isGranted('ROLE_ADMIN') && in_array('ROLE_ADMIN', $account->getRoles()) === false) {
             return true;
         }
 
@@ -89,7 +93,7 @@ class UserVoter extends Voter
 
     private function canDelete(User $account, $user) :bool
     {
-       return $this->canAuthorize($account, $user);
+        return $this->canAuthorize($account, $user);
 
     }
 
@@ -97,7 +101,7 @@ class UserVoter extends Voter
     private function canCreate(User|null $subject) :bool
     {
         if ($subject !== null) {
-           return $this->security->isGranted('ROLE_ADMIN');
+            return $this->security->isGranted('ROLE_ADMIN');
         }
 
         return true;

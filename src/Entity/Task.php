@@ -72,7 +72,7 @@ class Task
     }
 
 
-    public function setCreatedAt(\DateTimeInterface $createdAt = new DateTime()): static
+    public function setCreatedAt(\DateTimeInterface $createdAt= new DateTime()): static
     {
         $this->createdAt = $createdAt;
         return $this;

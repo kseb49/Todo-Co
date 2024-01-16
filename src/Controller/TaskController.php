@@ -27,8 +27,7 @@ class TaskController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         $tasks = $task->findAll();
-        return $this->render
-        (
+        return $this->render(
             'task/list.html.twig',
             ['tasks' => $tasks],
         );
@@ -86,10 +85,13 @@ class TaskController extends AbstractController
             return $this->redirectToRoute('task_list');
         }
 
-        return $this->render('task/edit.html.twig', [
+        return $this->render(
+            'task/edit.html.twig',
+            [
             'form' => $form,
             'task' => $task,
-        ]);
+            ]
+        );
 
     }
 
@@ -116,6 +118,7 @@ class TaskController extends AbstractController
 
         $this->addFlash('error', "Vous n'êtes pas autorisé à modifier cette tâche");
         return $this->redirectToRoute('task_list');
+
     }
 
 

@@ -21,16 +21,16 @@ class EditUserForm extends AbstractType
                 'username',
                 TextType::class,
                 [
-                    'label' => "Nom d'utilisateur",
-                    'required' => false,
+                 'label' => "Nom d'utilisateur",
+                 'required' => false,
                 ]
             )
             ->add(
                 'email',
                 EmailType::class,
                 [
-                    'label' => 'Adresse email',
-                    'required' => false,
+                 'label' => 'Adresse email',
+                 'required' => false,
                 ]
             );
 
@@ -42,9 +42,9 @@ class EditUserForm extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => User::class,
-                // Comment me to reactivate the html5 validation!.
-                'attr' => ['novalidate' => 'novalidate'],
+             'data_class' => User::class,
+             // Comment me to reactivate the html5 validation!.
+             'attr' => ['novalidate' => 'novalidate'],
             ]
         );
 

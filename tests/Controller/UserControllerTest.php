@@ -37,13 +37,13 @@ class UserControllerTest extends WebTestCase
      */
     private User|null $userAdmin = null;
 
-
     /**
      * user with ROLE_SUPER_ADMIN
      *
      * @var User|null
      */
     private User|null $userSuperAdmin = null;
+
 
     public function setUp(): void
     {
@@ -142,10 +142,8 @@ class UserControllerTest extends WebTestCase
         $form = $button->form();
         $this->client->submit(
             $form,
-                [
-                    sprintf('%s[username]', $form->getName()) => "Edit name",
-                ]
-            );
+            [sprintf('%s[username]', $form->getName()) => "Edit name"]
+        );
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! Modification réussie");
         $editedUser = $this->userRepository->find($this->user->getId());
