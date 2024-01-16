@@ -45,3 +45,29 @@ APP_SECRET=!new32characterskey!
 Charger les données initiales
 
 ```symfony console doctrine:fixtures:load```
+
+## Tests
+Le code  est couvert par des tests unitaires et fonctionnels implémentés avec [PHPUnit](https://docs.phpunit.de/en/10.5/index.html).
+
+Configurez le fichier .env.test
+```Dotenv
+DATABASE_URL="mysql://USERNAME:PASSWORD@127.0.0.1:3306/todoco?serverVersion=8.0.32&charset=utf8mb4"
+```
+Créez la base de données
+
+```symfony console --env=test doctrine:database:create```
+
+```symfony console doctrine:migrations:migrate -n --env=test ```
+
+Chargez les fixtures pour les tests
+
+```
+symfony console --env=test doctrine:fixtures:load --group=test      
+```
+
+Pour lancer les tests
+
+```
+php bin/phpunit --coverage-html public/test-coverage 
+```
+Le rapport est disponible dans le dossier **/public/test-coverage/index.html**
