@@ -45,7 +45,7 @@ class TaskController extends AbstractController
      */
     public function create(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $this->denyAccessUnlessGranted('create');
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $task = new Task();
         $form = $this->createForm(TaskForm::class, $task);
         $form->handleRequest($request);
