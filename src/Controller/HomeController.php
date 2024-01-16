@@ -8,8 +8,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class HomeController extends AbstractController
 {
     #[Route('/', name:"homepage")]
-    public function indexAction()
+    public function index()
     {
         return $this->render('default/index.html.twig');
     }
+
+
 }

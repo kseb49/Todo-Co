@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\TaskRepository;
@@ -14,10 +15,10 @@ class Task
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id =null;
+    private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private $createdAt;
+    private ?\DateTimeInterface $createdAt;
 
     #[ORM\Column(length: 50, type: Types::TEXT)]
     #[Assert\NotBlank(message:"Vous devez saisir un titre.")]
@@ -29,7 +30,7 @@ class Task
         minMessage: '{{ value }} est trop court. Le titre de la tâche ne peut pas être infèrieur à {{ limit }} caractères',
         maxMessage: '{{ value }} est trop long. Le titre de la tâche ne peut pas être supèrieur à {{ limit }} caractères'
     )]
-    private $title;
+    private ?string $title;
 
     #[ORM\Column(length: 1000, type: Types::TEXT)]
     #[Assert\NotBlank(message:"Vous devez saisir du contenu.")]
@@ -41,75 +42,93 @@ class Task
         minMessage: '{{ value }} est trop court. Le contenu de la tâche ne peut pas être infèrieur à {{ limit }} caractères',
         maxMessage: '{{ value }} est trop long. Le contenu de la tâche ne peut pas être supèrieur à {{ limit }} caractères'
     )]
-    private $content;
+    private ?string $content;
 
     #[ORM\Column(type: Types::BOOLEAN)]
-    private $isDone;
+    private ?bool $isDone;
 
     #[ORM\ManyToOne(inversedBy: 'task')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+
     public function __construct()
     {
         $this->createdAt = new \Datetime();
         $this->isDone = false;
+
     }
 
-    public function getId()
+
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCreatedAt()
+
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt($createdAt)
+
+    public function setCreatedAt(\DateTimeInterface $createdAt= new DateTime()): static
     {
         $this->createdAt = $createdAt;
+        return $this;
     }
 
-    public function getTitle()
+
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
-    public function setTitle($title)
+
+    public function setTitle(string $title): static
     {
         $this->title = $title;
+        return $this;
     }
 
-    public function getContent()
+
+    public function getContent(): ?string
     {
         return $this->content;
     }
 
-    public function setContent($content)
+
+    public function setContent(string $content): static
     {
         $this->content = $content;
+        return $this;
     }
 
-    public function isDone()
+
+    public function isDone(): ?bool
     {
         return $this->isDone;
     }
 
-    public function toggle(bool $flag)
+
+    public function toggle(bool $flag): static
     {
         $this->isDone = $flag;
+        return $this;
     }
+
 
     public function getUser(): ?User
     {
         return $this->user;
     }
 
+
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
+
+
 }
