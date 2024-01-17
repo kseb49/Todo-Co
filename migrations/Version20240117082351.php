@@ -35,5 +35,8 @@ final class Version20240117082351 extends AbstractMigration
         $this->addSql('ALTER TABLE task_user DROP FOREIGN KEY FK_FE2042328DB60186');
         $this->addSql('ALTER TABLE task_user DROP FOREIGN KEY FK_FE204232A76ED395');
         $this->addSql('DROP TABLE task_user');
+
     }
+
+
 }

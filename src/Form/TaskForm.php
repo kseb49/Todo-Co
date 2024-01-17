@@ -31,13 +31,13 @@ class TaskForm extends AbstractType
                 'referer',
                 EntityType::class,
                 [
-                    'class' => User::class,
-                    'choice_label' => 'username',
-                    'multiple' => true,
-                    'attr' => ['class' => 'form-control'],
-                    'label' => 'Mentionné des utilisateurs',
-                    'help' => 'Vous pouvez mentionné un ou plusieurs utilisateurs qui pourront consulter la tâche',
-                    'required' => false,
+                 'class' => User::class,
+                 'choice_label' => 'username',
+                 'multiple' => true,
+                 'attr' => ['class' => 'form-control'],
+                 'label' => 'Mentionné des utilisateurs',
+                 'help' => 'Vous pouvez mentionné un ou plusieurs utilisateurs qui pourront consulter la tâche',
+                 'required' => false,
                 ]
             );
 
