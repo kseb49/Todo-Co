@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity("email")]
@@ -65,10 +66,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Task::class)]
     private Collection $task;
 
+    #[ORM\ManyToMany(targetEntity: Task::class, mappedBy: 'referer')]
+    private Collection $mentionned;
+
 
     public function __construct()
     {
         $this->task = new ArrayCollection();
+        $this->mentionned = new ArrayCollection();
 
     }
 
@@ -142,6 +147,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
+    #[CodeCoverageIgnore]
     /**
      * @see UserInterface
      */
@@ -173,6 +179,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->task;
     }
 
+
     public function addTask(task $task): static
     {
         if ($this->task->contains($task) === false) {
@@ -183,6 +190,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
     public function removeTask(task $task): static
     {
         if ($this->task->removeElement($task) === true) {
@@ -190,6 +198,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($task->getUser() === $this) {
                 $task->setUser(null);
             }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getMentionned(): Collection
+    {
+        return $this->mentionned;
+    }
+
+
+    public function addMentionned(Task $mentionned): static
+    {
+        if (!$this->mentionned->contains($mentionned)) {
+            $this->mentionned->add($mentionned);
+            $mentionned->addReferer($this);
+        }
+
+        return $this;
+    }
+
+
+    public function removeMentionned(Task $mentionned): static
+    {
+        if ($this->mentionned->removeElement($mentionned)) {
+            $mentionned->removeReferer($this);
         }
 
         return $this;

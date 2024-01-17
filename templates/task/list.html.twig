@@ -4,20 +4,42 @@
 {% block title %} {{ parent() }} - Liste des tâches {% endblock  %}
 {% block body %}
     <a href="{{ path('task_create') }}" class="btn btn-info pull-right">Créer une tâche</a>
-    <hr class="border border-primary border-3">
+    {# <hr class="border border-primary border-3"> #}
     <h4 class="text-center">⬇️Vos Tâches⬇️</h4>
     <hr class="border border-primary border-3">
     <div class="row mt-2">
+    {% set own = false %}
         {% for task in tasks %}
             {% if app.user == task.user %}
                 {% include 'layout/tasks.html.twig' %}
+                {% set own = true %}
             {% endif %}
-            {% else %}
-                <div class="alert alert-warning" role="alert">
-                    Il n'y a pas encore de tâche enregistrée. <a href="{{ path('task_create') }}" class="btn btn-warning pull-right">Créer une tâche</a>
-                </div>
         {% endfor %}
+        {% if own == false %}
+            <div class="alert alert-warning">
+                Il n'y a pas encore de tâche enregistrée.
+            </div>
+        {% endif %}
     </div>
+        <hr class="border border-primary border-3">
+        <h4 class="text-center">⬇️Tâches où je suis mentionné⬇️</h4>
+        <hr class="border border-primary border-3">
+        <div class="row">
+            {% set mention = false %}
+            {% for task in tasks %}
+                {% for referer in task.referer %}
+                    {% if referer == app.user %}
+                        {% include 'layout/tasks.html.twig' %}
+                        {% set mention = true %}
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+            {% if mention == false %}
+            <div class="alert alert-warning">
+                Vous n'êtes mentionnés dans aucune tâches.
+            </div>
+        {% endif %}
+        </div>
     {% if is_granted('ROLE_ADMIN') %}
         <hr class="border border-primary border-3">
         <h4 class="text-center">⬇️Tâches des autres utilisateurs⬇️</h4>

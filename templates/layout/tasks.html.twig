@@ -4,25 +4,23 @@
             <h4 class="pull-right">
                 {% if task.isDone %}<span class="glyphicon glyphicon-ok"></span>{% else %}<span class="glyphicon glyphicon-remove"></span>{% endif %}
             </h4>
-            <h4><a href="{{ path('task_edit', {'id' : task.id }) }}">{{ task.title }}</a></h4>
+            <h4>
+                {% if app.user == task.user or is_granted('ROLE_ADMIN') and  task.user.username == 'anonyme'%}
+                    <a href="{{ path('task_edit', {'id' : task.id }) }}"> {{ task.title }} </a>
+                {% else %}
+                    {{ task.title }}
+                {% endif %}
+            </h4>
             <p>{{ task.content }}</p>
-            <p class="font-weight-light">@{{ task.user.username }}</p>
+            <p class="font-weight-light">Auteur : {{ task.user.username }}</p>
+            <div class="card-footer text-muted">
+                {{task.createdAt | date("d/m/y")}}
+            </div>
         </div>
         <div>
-        {% if app.user == task.user  or task.user.username == 'anonyme'%}
-            <form action="{{ path('task_toggle', {'id' : task.id }) }}" method = "post">
-             <input type="hidden" name="token" value={{csrf_token('toggle-state')}}>
-                <button class="btn btn-success btn-sm pull-right" id="toggle{{task.id}}">
-                {% if not task.isDone %}Marquer comme faite{% else %}Marquer non terminée{% endif %}
-                </button>
-            </form>
+        {% if app.user == task.user  or task.user.username == 'anonyme' and is_granted('ROLE_ADMIN')%}
+            {% include 'layout/form_tasks.html.twig' %}
         {% endif %}
-            {% if app.user == task.user or task.user.username == 'anonyme' and app.user.roles[0] == 'ROLE_ADMIN' %}
-            <form action="{{ path('task_delete', {'id' : task.id }) }}" method = "post">
-                <input type="hidden" name="token" value={{csrf_token('delete-task')}}>
-                <button class="btn btn-danger btn-sm pull-right" id="delete{{task.id}}">Supprimer</button>
-            </form>
-            {% endif %}
         </div>
     </div>
 </div>

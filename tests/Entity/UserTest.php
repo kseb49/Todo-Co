@@ -2,6 +2,7 @@
 
 namespace App\Tests\Entity;
 
+use App\Entity\Task;
 use App\Entity\User;
 use PHPUnit\Framework\TestCase;
 use Doctrine\Common\Collections\Collection;
@@ -78,6 +79,39 @@ class UserTest extends TestCase
             ['john'],
             ['jane'],
         ];
+
+    }
+
+
+    public function testMentionned()
+    {
+        $user = new User();
+        $task = $this->createStub(Task::class);
+        $user->addMentionned($task);
+        $this->assertContains($task, $user->getMentionned());
+        $this->assertInstanceOf(Collection::class, $user->getMentionned());
+        $user->removeMentionned($task);
+        $this->assertNotContains($task, $user->getMentionned());
+
+    }
+
+
+    public function testAddTask()
+    {
+        $task = new Task();
+        $user = new User();
+        $user->addTask($task);
+        $this->assertContains($task, $user->getTask());
+
+    }
+
+
+    public function testRemoveTask()
+    {
+        $task = new Task();
+        $user = new User();
+        $user->removeTask($task);
+        $this->assertNotContains($task, $user->getTask());
 
     }
 

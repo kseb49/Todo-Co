@@ -5,6 +5,7 @@ namespace App\Tests\Entity;
 use DateTime;
 use App\Entity\Task;
 use App\Entity\User;
+use Doctrine\Common\Collections\Collection;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -71,6 +72,19 @@ class TaskTest extends TestCase
         $this->assertSame('new title', $task->getTitle());
         $this->assertInstanceOf(DateTime::class, $task->getCreatedAt());
         $this->assertInstanceOf(User::class, $user);
+
+    }
+
+
+    public function testReferer()
+    {
+        $task = new Task();
+        $user = $this->createStub(User::class);
+        $task->addReferer($user);
+        $this->assertInstanceOf(Collection::class, $task->getReferer());
+        $this->assertContains($user, $task->getReferer());
+        $task->removeReferer($user);
+        $this->assertNotContains($user, $task->getReferer());
 
     }
 
