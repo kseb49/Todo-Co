@@ -114,9 +114,9 @@ class TaskControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/tasks/create');
         $button = $crawler->selectButton('Ajouter');
         $form = $button->form();
-        $form [sprintf('%s[referer]', $form->getName())] -> select ($this->userAdmin->getId());
-        $form [sprintf('%s[title]', $form->getName())] = "Une tâche de test";
-        $form [sprintf('%s[content]', $form->getName())] = "Nouvelle tâche de test";
+        $form[sprintf('%s[referer]', $form->getName())] -> select ($this->userAdmin->getId());
+        $form[sprintf('%s[title]', $form->getName())] = "Une tâche de test";
+        $form[sprintf('%s[content]', $form->getName())] = "Nouvelle tâche de test";
         $this->client->submit($form);
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a été bien été ajoutée.");
