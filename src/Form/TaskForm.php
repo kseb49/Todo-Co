@@ -3,8 +3,10 @@
 namespace App\Form;
 
 use App\Entity\Task;
+use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -24,6 +26,19 @@ class TaskForm extends AbstractType
                 'content',
                 TextareaType::class,
                 ['label' => 'Contenu']
+            )
+            ->add(
+                'user',
+                EntityType::class,
+                [
+                 'class' => User::class,
+                 'choice_label' => 'username',
+                 'multiple' => true,
+                 'attr' => ['class' => 'form-control'],
+                 'label' => 'Mentionné des utilisateurs',
+                 'help' => 'Vous pouvez mentionné un ou plusieurs utilisateurs qui pourront consulter la tâche',
+                 'required' => false,
+                ]
             );
 
     }

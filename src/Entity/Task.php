@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\TaskRepository;
@@ -51,11 +53,15 @@ class Task
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'mentionned')]
+    private Collection $referer;
+
 
     public function __construct()
     {
         $this->createdAt = new \Datetime();
         $this->isDone = false;
+        $this->referer = new ArrayCollection();
 
     }
 
@@ -128,6 +134,33 @@ class Task
     public function setUser(?User $user): static
     {
         $this->user = $user;
+        return $this;
+    }
+
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getReferer(): Collection
+    {
+        return $this->referer;
+    }
+
+
+    public function addReferer(User $referer): static
+    {
+        if (!$this->referer->contains($referer)) {
+            $this->referer->add($referer);
+        }
+
+        return $this;
+    }
+
+
+    public function removeReferer(User $referer): static
+    {
+        $this->referer->removeElement($referer);
+
         return $this;
     }
 
