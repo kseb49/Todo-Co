@@ -28,7 +28,7 @@ class TaskForm extends AbstractType
                 ['label' => 'Contenu']
             )
             ->add(
-                'user',
+                'referer',
                 EntityType::class,
                 [
                  'class' => User::class,
