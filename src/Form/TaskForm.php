@@ -5,9 +5,9 @@ namespace App\Form;
 use App\Entity\Task;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class TaskForm extends AbstractType
 {
@@ -16,10 +16,14 @@ class TaskForm extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options) :void
     {
         $builder
-            ->add('title')
+            ->add(
+                'title',
+                options:['label' => 'Titre'],
+            )
             ->add(
                 'content',
                 TextareaType::class,
+                ['label' => 'Contenu']
             );
 
     }

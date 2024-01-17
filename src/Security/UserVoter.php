@@ -98,15 +98,13 @@ class UserVoter extends Voter
     }
 
 
-    private function canCreate(User|null $subject) :bool
-    {
-        if ($subject !== null) {
-            return $this->security->isGranted('ROLE_ADMIN');
-        }
+    // private function canCreate(User|null $subject) :bool
+    // {
+    //     if ($subject !== null) {
+    //         return $this->security->isGranted('ROLE_ADMIN');
+    //     }
 
-        return true;
+    //     return true;
 
-    }
-
-
+    // }
 }
