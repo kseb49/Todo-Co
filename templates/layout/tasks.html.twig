@@ -6,11 +6,16 @@
             </h4>
             <h4>
                 {% if app.user == task.user or is_granted('ROLE_ADMIN') and  task.user.username == 'anonyme'%}
-                    <a href="{{ path('task_edit', {'id' : task.id }) }}"> {{ task.title }} </a> {% else %} {{ task.title }}
+                    <a href="{{ path('task_edit', {'id' : task.id }) }}"> {{ task.title }} </a>
+                {% else %}
+                    {{ task.title }}
                 {% endif %}
             </h4>
             <p>{{ task.content }}</p>
-            <p class="font-weight-light">@{{ task.user.username }}</p>
+            <p class="font-weight-light">Auteur : {{ task.user.username }}</p>
+            <div class="card-footer text-muted">
+                {{task.createdAt | date("d/m/y")}}
+            </div>
         </div>
         <div>
         {% if app.user == task.user  or task.user.username == 'anonyme' and is_granted('ROLE_ADMIN')%}
