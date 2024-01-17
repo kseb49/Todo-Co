@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity("email")]
@@ -146,6 +147,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
+    #[CodeCoverageIgnore]
     /**
      * @see UserInterface
      */

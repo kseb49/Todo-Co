@@ -339,4 +339,22 @@ class UserControllerTest extends WebTestCase
     }
 
 
+    // public function testRemoveTask()
+    // {
+    //     $task = $this->taskRepository->findOneBy(['user' => $this->user]);
+    //     $this->user->removeTask($task);
+    //     $this->assertNotContains($task, $this->user->getTask());
+
+    // }
+
+
+    // public function testAddTask()
+    // {
+    //     $task = new Task;
+    //     $this->user->addTask($task);
+    //     $this->assertContains($task, $this->user->getTask());
+
+    // }
+
+
 }

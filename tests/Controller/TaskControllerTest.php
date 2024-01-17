@@ -2,6 +2,7 @@
 
 namespace App\Tests\Entity;
 
+use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
@@ -68,6 +69,11 @@ class TaskControllerTest extends WebTestCase
     }
 
 
+    /**
+     * Test the display of the list page
+     *
+     * @return void
+     */
     public function testList()
     {
         $this->client->loginUser($this->user);
@@ -110,13 +116,10 @@ class TaskControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/tasks/create');
         $button = $crawler->selectButton('Ajouter');
         $form = $button->form();
-        $this->client->submit(
-            $form,
-            [
-                sprintf('%s[title]', $form->getName()) => "Une tâche de test",
-                sprintf('%s[content]', $form->getName()) => "Nouvelle tâche de test",
-            ]
-        );
+        $form [sprintf('%s[referer]', $form->getName())] -> select ($this->userAdmin->getId());
+        $form [sprintf('%s[title]', $form->getName())] = "Une tâche de test";
+        $form [sprintf('%s[content]', $form->getName())] = "Nouvelle tâche de test";
+        $this->client->submit($form);
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a été bien été ajoutée.");
         $taskUserId = $this->taskRepository->findOneBy(['title' => "Une tâche de test"])->getUser()->getId();
@@ -126,7 +129,7 @@ class TaskControllerTest extends WebTestCase
 
 
     /**
-     * Test the access to the edit form
+     * Test the edit form
      *
      * @return void
      */
@@ -160,6 +163,11 @@ class TaskControllerTest extends WebTestCase
     }
 
 
+    /**
+     * Test the toggle method
+     *
+     * @return void
+     */
     public function testToggleState()
     {
         for ($i =0; $i < 2 ; $i++) {
@@ -184,7 +192,7 @@ class TaskControllerTest extends WebTestCase
 
 
     /**
-     * Test the csrf protection
+     * Test the csrf protection for togggle
      *
      * @return void
      */
@@ -257,7 +265,7 @@ class TaskControllerTest extends WebTestCase
 
 
     /**
-     * Test the csrf protection
+     * Test the csrf protection to delete a task
      *
      * @return void
      */
