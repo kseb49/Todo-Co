@@ -4,16 +4,13 @@
 {% block title %} {{ parent() }} - Liste des tâches {% endblock  %}
 {% block body %}
     <a href="{{ path('task_create') }}" class="btn btn-info pull-right">Créer une tâche</a>
-    {# <hr class="border border-primary border-3"> #}
     <h4 class="text-center">⬇️Vos Tâches⬇️</h4>
     <hr class="border border-primary border-3">
     <div class="row mt-2">
-    {% set own = false %}
-        {% for task in tasks %}
-            {% if app.user == task.user %}
+        {% set own = false %}
+        {% for task in user_tasks %}
                 {% include 'layout/tasks.html.twig' %}
                 {% set own = true %}
-            {% endif %}
         {% endfor %}
         {% if own == false %}
             <div class="alert alert-warning">
@@ -26,13 +23,9 @@
         <hr class="border border-primary border-3">
         <div class="row">
             {% set mention = false %}
-            {% for task in tasks %}
-                {% for referer in task.referer %}
-                    {% if referer == app.user %}
-                        {% include 'layout/tasks.html.twig' %}
-                        {% set mention = true %}
-                    {% endif %}
-                {% endfor %}
+            {% for task in refs %}
+                {% include 'layout/tasks.html.twig' %}
+                {% set mention = true %}
             {% endfor %}
             {% if mention == false %}
             <div class="alert alert-warning">

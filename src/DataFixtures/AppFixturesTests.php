@@ -18,10 +18,12 @@ class AppFixturesTests extends Fixture implements FixtureGroupInterface
 
     }
 
+
     public static function getGroups(): array
     {
         return ['test'];
     }
+
 
     /**
      * Create 4 test users and 25 tasks
