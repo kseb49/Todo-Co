@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 #[Route('users')]
 class UserController extends AbstractController
@@ -27,12 +29,20 @@ class UserController extends AbstractController
      * Display the users list page
      *
      * @param UserRepository $users
+     * @param TagAwareCacheInterface $cache
      * @return Response
      */
-    public function list(UserRepository $users): Response
+    public function list(UserRepository $users, TagAwareCacheInterface $cache): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
+        $datas = $cache->get('user_list', function(ItemInterface $item) use($users)
+            {
+                $item->expiresAfter(20);
+                $item->tag('user_list');
+                return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
+            }
+        );
+        return $datas;
 
     }
 
@@ -44,18 +54,14 @@ class UserController extends AbstractController
      * @param Request $request
      * @param UserPasswordHasherInterface $userPasswordHasher
      * @param EntityManagerInterface $entityManager
+     * @param TagAwareCacheInterface $cache
      * @return Response
      */
-    public function create(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    public function create(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): Response
     {
         if ($this->getUser() !== null) {
             $this->denyAccessUnlessGranted('ROLE_ADMIN');
         }
-
-        // if ($this->getUser() === null) {
-        //     $this->denyAccessUnlessGranted('create');
-        // }
-
         $user = new User();
         $form = $this->createForm(UserForm::class, $user);
         $form->handleRequest($request);
@@ -69,6 +75,7 @@ class UserController extends AbstractController
 
             $entityManager->persist($user);
             $entityManager->flush();
+            $cache->invalidateTags(['user_list']);
             $this->addFlash('success', "L'utilisateur a bien été ajouté.");
             return $this->redirectToRoute('homepage');
         }
@@ -85,9 +92,10 @@ class UserController extends AbstractController
      * @param User $user
      * @param Request $request
      * @param EntityManagerInterface $entityManager
+     * @param TagAwareCacheInterface $cache
      * @return Response
      */
-    public function edit(User $user, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(User $user, Request $request, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): Response
     {
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditUserForm::class, $user);
@@ -95,6 +103,7 @@ class UserController extends AbstractController
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $entityManager->persist($user);
             $entityManager->flush();
+            $cache->invalidateTags(['user_list']);
             $this->addFlash('success', "Modification réussie");
             return $this->redirectToRoute('homepage');
         }
@@ -111,9 +120,10 @@ class UserController extends AbstractController
      * @param User $user
      * @param EntityManagerInterface $entityManager
      * @param Request $request
+     * @param TagAwareCacheInterface $cache
      * @return Response
      */
-    public function toggleRole(User $user, EntityManagerInterface $entityManager, Request $request): Response
+    public function toggleRole(User $user, EntityManagerInterface $entityManager, Request $request, TagAwareCacheInterface $cache): Response
     {
         $this->denyAccessUnlessGranted('authorize', subject : $user, message: "Vous n'êtes pas autorisé à changer les droits de cet utilisateurs");
         $form = $this->createForm(ToggleRoleForm::class, $user);
@@ -134,6 +144,7 @@ class UserController extends AbstractController
 
                 $entityManager->persist($user);
                 $entityManager->flush();
+                $cache->invalidateTags(['user_list']);
                 $this->addFlash('success', "Le rôle a bien était modifié");
                 return $this->redirectToRoute('user_list');
             }
@@ -183,9 +194,10 @@ class UserController extends AbstractController
      * @param EntityManagerInterface $entityManager
      * @param Request $request
      * @param UserRepository $anonymous
+     * @param TagAwareCacheInterface $cache
      * @return RedirectResponse
      */
-    public function delete(User $user, EntityManagerInterface $entityManager, Request $request, UserRepository $anonymous) : RedirectResponse
+    public function delete(User $user, EntityManagerInterface $entityManager, Request $request, UserRepository $anonymous, TagAwareCacheInterface $cache) : RedirectResponse
     {
         $this->denyAccessUnlessGranted('delete', $user);
         $token = $request->request->get('token');
@@ -199,6 +211,7 @@ class UserController extends AbstractController
 
             $entityManager->remove($user);
             $entityManager->flush();
+            $cache->invalidateTags(['user_list']);
             $this->addFlash('success', "L'utilisateur a bien été supprimé");
             return $this->redirectToRoute('user_list');
         }
