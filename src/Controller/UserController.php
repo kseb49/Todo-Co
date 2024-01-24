@@ -100,12 +100,15 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditUserForm::class, $user);
         $form->handleRequest($request);
-        if ($form->isSubmitted() === true && $form->isValid() === true) {
-            $entityManager->persist($user);
-            $entityManager->flush();
-            $cache->invalidateTags(['user_list']);
-            $this->addFlash('success', "Modification réussie");
-            return $this->redirectToRoute('homepage');
+        if ($form->isSubmitted() === true ) {
+            if ($form->isValid() === true) {
+                $entityManager->persist($user);
+                $entityManager->flush();
+                $cache->invalidateTags(['user_list']);
+                $this->addFlash('success', "Modification réussie");
+                return $this->redirectToRoute('homepage');
+            }
+            $entityManager->refresh($user);
         }
 
         return $this->render('user/edit.html.twig', ['form' => $form->createView(), 'user' => $user]);
@@ -175,12 +178,15 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditPasswordForm::class, $user);
         $form->handleRequest($request);
-        if ($form->isSubmitted() === true && $form->isValid() === true) {
-            $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
-            $entityManager->persist($user);
-            $entityManager->flush();
-            $this->addFlash('success', "Votre mot de passe a était modifié");
-            return $this->redirectToRoute('homepage');
+        if ($form->isSubmitted() === true ) {
+            if ($form->isValid() === true) {
+                $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
+                $entityManager->persist($user);
+                $entityManager->flush();
+                $this->addFlash('success', "Votre mot de passe a était modifié");
+                return $this->redirectToRoute('homepage');
+            }
+            $entityManager->refresh($user);
         }
 
         return $this->render('user/editpassword.html.twig', ['form' => $form->createView(), 'user' => $user]);

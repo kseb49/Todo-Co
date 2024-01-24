@@ -32,7 +32,7 @@ class Task
         minMessage: '{{ value }} est trop court. Le titre de la tâche ne peut pas être infèrieur à {{ limit }} caractères',
         maxMessage: '{{ value }} est trop long. Le titre de la tâche ne peut pas être supèrieur à {{ limit }} caractères'
     )]
-    private ?string $title;
+    private ?string $title = null;
 
     #[ORM\Column(length: 1000, type: Types::TEXT)]
     #[Assert\NotBlank(message:"Vous devez saisir du contenu.")]
@@ -44,7 +44,7 @@ class Task
         minMessage: '{{ value }} est trop court. Le contenu de la tâche ne peut pas être infèrieur à {{ limit }} caractères',
         maxMessage: '{{ value }} est trop long. Le contenu de la tâche ne peut pas être supèrieur à {{ limit }} caractères'
     )]
-    private ?string $content;
+    private ?string $content = null;
 
     #[ORM\Column(type: Types::BOOLEAN)]
     private ?bool $isDone;
@@ -92,7 +92,7 @@ class Task
     }
 
 
-    public function setTitle(string $title): static
+    public function setTitle(?string $title): static
     {
         $this->title = $title;
         return $this;
@@ -105,7 +105,7 @@ class Task
     }
 
 
-    public function setContent(string $content): static
+    public function setContent(?string $content): static
     {
         $this->content = $content;
         return $this;
