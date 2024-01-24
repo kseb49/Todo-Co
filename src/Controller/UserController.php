@@ -37,7 +37,7 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $datas = $cache->get('user_list', function(ItemInterface $item) use($users)
             {
-                $item->expiresAfter(20);
+                $item->expiresAfter(3600);
                 $item->tag('user_list');
                 return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
             }
@@ -139,6 +139,7 @@ class UserController extends AbstractController
                     break;
                 default:
                     $this->addFlash('error', "Erreur");
+                    $cache->invalidateTags(['user_list']);
                     return $this->redirectToRoute('user_list');
                 }
 
@@ -149,6 +150,7 @@ class UserController extends AbstractController
                 return $this->redirectToRoute('user_list');
             }
 
+            $cache->invalidateTags(['user_list']);
             $this->addFlash('error', "Vous n'avez pas modifié les droits de ce compte");
             return $this->redirectToRoute('user_list');
         }
@@ -200,10 +202,11 @@ class UserController extends AbstractController
     public function delete(User $user, EntityManagerInterface $entityManager, Request $request, UserRepository $anonymous, TagAwareCacheInterface $cache) : RedirectResponse
     {
         $this->denyAccessUnlessGranted('delete', $user);
+        $cache->invalidateTags(['user_list']);
         $token = $request->request->get('token');
         if ($this->isCsrfTokenValid('delete-item', $token) === true) {
             $task = $entityManager->getRepository(Task::class);
-            $tasks = $task->findByUsers($user->getId());
+            $tasks = $task->findBy(['user' => $user->getId()]);
             $anonymousUser = $anonymous->findOneBy(['username' => 'anonyme']);
             foreach ($tasks as $task) {
                 $task->setUser($anonymousUser);
@@ -211,7 +214,6 @@ class UserController extends AbstractController
 
             $entityManager->remove($user);
             $entityManager->flush();
-            $cache->invalidateTags(['user_list']);
             $this->addFlash('success', "L'utilisateur a bien été supprimé");
             return $this->redirectToRoute('user_list');
         }

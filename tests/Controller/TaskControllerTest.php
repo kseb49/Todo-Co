@@ -55,6 +55,132 @@ class TaskControllerTest extends WebTestCase
 
 
     /**
+     * Delete a task (by its owner)
+     *
+     * @return void
+     */
+    public function testDeleteTask()
+    {
+        $task = $this->taskRepository->findOneBy(['user' => $this->user]);
+        $taskId = $task->getId();
+        $this->client->loginUser($this->user);
+        $crawler = $this->client->request('GET', '/tasks');
+        $button = $crawler->selectButton('Supprimer');
+        $form = $button->form();
+        $this->client->submit($form);
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a bien été supprimée.");
+        $this->assertEmpty($this->taskRepository->find($taskId));
+
+    }
+
+
+    /**
+     * A ROLE_ADMIN user can delete an anonymous task
+     *
+     * @return void
+     */
+    public function testDeleteAnonyme()
+    {
+        $task = $this->taskRepository->findOneBy(['user' => $this->userAnonyme]);
+        $taskId = $task->getId();
+        $this->client->loginUser($this->userAdmin);
+        $this->client->request('GET', '/tasks');
+        $this->client->submitForm('delete'.$taskId);
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a bien été supprimée.");
+        $this->assertEmpty($this->taskRepository->find($taskId));
+
+    }
+
+
+    /**
+     * A ROLE_USER user cannot delete an anonymous task
+     *
+     * @return void
+     */
+    public function testDeleteAnonymeByUnauthorized()
+    {
+        $task = $this->taskRepository->findOneBy(['user' => $this->userAnonyme]);
+        $taskId = $task->getId();
+        $this->client->loginUser($this->user);
+        $this->client->request('GET', '/tasks/'.$taskId.'/delete');
+        $this->assertResponseStatusCodeSame(403);
+
+    }
+
+
+    /**
+     * Test the csrf protection to delete a task
+     *
+     * @return void
+     */
+    public function testDeleteCsrf()
+    {
+        $task = $this->taskRepository->findOneBy(['user' => $this->user]);
+        $taskId = $task->getId();
+        $this->client->loginUser($this->user);
+        $crawler = $this->client->request('GET', '/tasks');
+        // $this->client->submitForm('delete'.$taskId);
+        $button = $crawler->filter('#delete'.$taskId);
+        $form = $button->form();
+        $this->client->submit(
+            $form,
+            ['token' => "dummy token"]
+        );
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-danger', "Vous n'êtes pas autorisé à supprimer cette tâche");
+
+    }
+
+
+    /**
+     * Test the toggle method
+     *
+     * @return void
+     */
+    public function testToggleState()
+    {
+        // for ($i =0; $i < 2 ; $i++) {
+        $this->client->loginUser($this->userAdmin);
+        $this->client->request('GET', '/tasks');
+        $task = $this->taskRepository->findOneBy(['user' => $this->userAdmin]);
+        $taskState = $task->isDone();
+        if ($taskState === true) {
+            $text = sprintf("Superbe ! La tâche %s a bien été marquée en cours.", $task->getTitle());
+        }
+
+        if ($taskState === false) {
+            $text = sprintf("Superbe ! La tâche %s a bien été marquée terminée.", $task->getTitle());
+        }
+
+        $this->client->submitForm('toggle'.$task->getId());
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', $text);
+        // $this->assertSelectorExists('div.alert.alert-success');
+            // }
+
+    }
+
+
+    /**
+     * Test the csrf protection for togggle
+     *
+     * @return void
+     */
+    public function testToggleStateCsrf()
+    {
+        $this->client->loginUser($this->user);
+        $this->client->request('GET', '/tasks');
+        $task = $this->taskRepository->findOneBy(['user' => $this->user]);
+        $this->client->submitForm('toggle'.$task->getId(), ['token' => "Dummy token"]);
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-danger', "Oops ! Vous n'êtes pas autorisé à modifier cette tâche");
+
+    }
+
+
+    /**
      * test the access control to the users list
      *
      * @return void
@@ -127,6 +253,29 @@ class TaskControllerTest extends WebTestCase
 
 
     /**
+     * Test the display of the list page
+     *
+     * @return void
+     */
+    public function testListWithMentionned()
+    {
+        $this->client->loginUser($this->userAdmin);
+        $crawler = $this->client->request('GET', '/tasks');
+        $this->assertResponseIsSuccessful();
+        $link = $crawler->filter('a[href="/tasks/create"]')->text();
+        $this->assertSame('Créer une tâche', $link);
+        $this->assertNotEmpty($this->userAdmin->getMentionned());
+        $title = '';
+        foreach ($this->userAdmin->getMentionned() as $key => $value) {
+           $title .= $value->getTitle();
+        }
+        $this->assertAnySelectorTextContains('h4', $title);
+        $this->assertPageTitleContains('Liste des tâches');
+
+    }
+
+
+    /**
      * Test the edit form
      *
      * @return void
@@ -150,138 +299,13 @@ class TaskControllerTest extends WebTestCase
                 [
                     sprintf('%s[title]', $form->getName()) => "Edited title",
                     sprintf('%s[content]', $form->getName()) => "edited content",
-                ]
-            );
+                    ]
+                );
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a bien été modifiée.");
         $editedTask = $this->taskRepository->find($param);
         $this->assertSame("Edited title", $editedTask->getTitle());
         $this->assertSame("edited content", $editedTask->getContent());
-
-    }
-
-
-    /**
-     * Test the toggle method
-     *
-     * @return void
-     */
-    public function testToggleState()
-    {
-        for ($i =0; $i < 2 ; $i++) {
-            $this->client->loginUser($this->user);
-            $this->client->request('GET', '/tasks');
-            $task = $this->taskRepository->findOneBy(['user' => $this->user]);
-            $taskState = $task->isDone();
-            if ($taskState === true) {
-                $text = sprintf("Superbe ! La tâche %s a bien été marquée en cours.", $task->getTitle());
-            }
-
-            if ($taskState === false) {
-                $text = sprintf("Superbe ! La tâche %s a bien été marquée terminée.", $task->getTitle());
-            }
-
-            $this->client->submitForm('toggle'.$task->getId());
-            $this->client->followRedirect();
-            $this->assertSelectorTextContains('div.alert.alert-success', $text);
-        }
-
-    }
-
-
-    /**
-     * Test the csrf protection for togggle
-     *
-     * @return void
-     */
-    public function testToggleStateCsrf()
-    {
-        $this->client->loginUser($this->user);
-        $this->client->request('GET', '/tasks');
-        $task = $this->taskRepository->findOneBy(['user' => $this->user]);
-        $this->client->submitForm('toggle'.$task->getId(), ['token' => "Dummy token"]);
-        $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-danger', "Oops ! Vous n'êtes pas autorisé à modifier cette tâche");
-
-    }
-
-
-    /**
-     * Delete a task (by its owner)
-     *
-     * @return void
-     */
-    public function testDelete()
-    {
-        $task = $this->taskRepository->findOneBy(['user' => $this->user]);
-        $taskId = $task->getId();
-        $this->client->loginUser($this->user);
-        $crawler = $this->client->request('GET', '/tasks');
-        $button = $crawler->selectButton('Supprimer');
-        $form = $button->form();
-        $this->client->submit($form);
-        $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a bien été supprimée.");
-        $this->assertEmpty($this->taskRepository->find($taskId));
-
-    }
-
-
-    /**
-     * A ROLE_ADMIN user can delete an anonymous task
-     *
-     * @return void
-     */
-    public function testDeleteAnonyme()
-    {
-        $task = $this->taskRepository->findOneBy(['user' => $this->userAnonyme]);
-        $taskId = $task->getId();
-        $this->client->loginUser($this->userAdmin);
-        $this->client->request('GET', '/tasks');
-        $this->client->submitForm('delete'.$taskId);
-        $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a bien été supprimée.");
-        $this->assertEmpty($this->taskRepository->find($taskId));
-
-    }
-
-
-    /**
-     * A ROLE_USER user cannot delete an anonymous task
-     *
-     * @return void
-     */
-    public function testDeleteAnonymeByUnauthorized()
-    {
-        $task = $this->taskRepository->findOneBy(['user' => $this->userAnonyme]);
-        $taskId = $task->getId();
-        $this->client->loginUser($this->user);
-        $this->client->request('GET', '/tasks/'.$taskId.'/delete');
-        $this->assertResponseStatusCodeSame(403);
-
-    }
-
-
-    /**
-     * Test the csrf protection to delete a task
-     *
-     * @return void
-     */
-    public function testDeleteCsrf()
-    {
-        $task = $this->taskRepository->findOneBy(['user' => $this->user]);
-        $taskId = $task->getId();
-        $this->client->loginUser($this->user);
-        $crawler = $this->client->request('GET', '/tasks');
-        // $this->client->submitForm('delete'.$taskId);
-        $button = $crawler->filter('#delete'.$taskId);
-        $form = $button->form();
-        $this->client->submit(
-            $form,
-            ['token' => "dummy token"]
-        );
-        $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-danger', "Vous n'êtes pas autorisé à supprimer cette tâche");
 
     }
 

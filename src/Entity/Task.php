@@ -54,7 +54,7 @@ class Task
     private ?User $user = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'mentionned')]
-    private Collection $referer;
+    private ?Collection $referer = null;
 
 
     public function __construct()

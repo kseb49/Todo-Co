@@ -35,14 +35,19 @@ class TaskController extends AbstractController
         $key = preg_replace('#@.#','',$this->getUser()->getUserIdentifier());
         $datas = $cache->get('task_list_'.$key, function(ItemInterface $item) use($task, $user)
             {
-                $item->expiresAfter(20);
+                $item->expiresAfter(3600);
                 $user_tasks = $task->findBy(['user' => $user]);
                 $ment = $user->getMentionned();
-                $tasks_ids = [];
-                foreach ($ment as $value) {
-                    array_push($tasks_ids, $value->getId());
+                if (count($ment) !== 0) {
+                    $tasks_ids = [];
+                    foreach ($ment as $value) {
+                        array_push($tasks_ids, $value->getId());
+                    }
+                    $tasks = $task->findExcept($user->getId(), $tasks_ids);
                 }
-                $tasks = $task->findExcept($user->getId(), $tasks_ids);
+                else {
+                    $tasks = $task->findExcept($user->getId());
+                }
                 $item->tag('task_list');
                 return $this->render(
                     'task/list.html.twig',
@@ -133,10 +138,10 @@ class TaskController extends AbstractController
     {
         $this->denyAccessUnlessGranted('toggle', $task, "Seul le créateur de la tâche peut en changer son état");
         $submittedToken = $request->request->get('token');
+        $cache->invalidateTags(['task_list']);
         if ($this->isCsrfTokenValid('toggle-state', $submittedToken) === true) {
             $task->toggle(!$task->isDone());
             $entityManager->flush();
-            $cache->invalidateTags(['task_list']);
             $message = $task->isDone() === true ? "terminée" : "en cours";
             $this->addFlash('success', sprintf('La tâche %s a bien été marquée %s.', $task->getTitle(), $message));
             return $this->redirectToRoute('task_list');
@@ -162,10 +167,10 @@ class TaskController extends AbstractController
     {
         $this->denyAccessUnlessGranted('delete', $task, "Vous ne pouvez pas supprimer la tâche d'un autre utilisateur");
         $submittedToken = $request->request->get('token');
+        $cache->invalidateTags(['task_list']);
         if ($this->isCsrfTokenValid('delete-task', $submittedToken) === true) {
             $entityManager->remove($task);
             $entityManager->flush();
-            $cache->invalidateTags(['task_list']);
             $this->addFlash('success', 'La tâche a bien été supprimée.');
             return $this->redirectToRoute('task_list');
         }

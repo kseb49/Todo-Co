@@ -67,7 +67,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $task;
 
     #[ORM\ManyToMany(targetEntity: Task::class, mappedBy: 'referer')]
-    private Collection $mentionned;
+    private ?Collection $mentionned = null;
 
 
     public function __construct()

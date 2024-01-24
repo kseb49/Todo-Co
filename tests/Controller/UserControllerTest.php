@@ -6,6 +6,8 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+
 /**
  * Application Tests class
  */
@@ -71,6 +73,11 @@ class UserControllerTest extends WebTestCase
     }
 
 
+    /**
+     * Test the display of the users list page
+     *
+     * @return void
+     */
     public function testList()
     {
         $this->client->loginUser($this->userAdmin);
@@ -153,6 +160,24 @@ class UserControllerTest extends WebTestCase
 
 
     /**
+     * ROLE_ADMIN can Delete a user account
+     *
+     * @return void
+     */
+    public function testDeleteUser()
+    {
+        $userToDeleteId = $this->user->getId();
+        $this->client->loginUser($this->userAdmin);
+        $this->client->request('GET', '/users/list');
+        $this->client->submitForm('delete-user'.$userToDeleteId);
+        $this->client->followRedirect();
+        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! L'utilisateur a bien été supprimé");
+        $this->assertNull($this->userRepository->find($userToDeleteId));
+
+    }
+
+
+    /**
      * A ROLE_ADMIN can upgrade a role
      *
      * @return void
@@ -219,24 +244,6 @@ class UserControllerTest extends WebTestCase
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-danger', "Vous n'avez pas modifié les droits de ce compte");
         $this->assertTrue(in_array('ROLE_USER', $this->userRepository->findOneByEmail('testuser0@test.com')->getRoles()));
-
-    }
-
-
-    /**
-     * ROLE_ADMIN can Delete a user account
-     *
-     * @return void
-     */
-    public function testDeleteUser()
-    {
-        $userToDeleteId = $this->user->getId();
-        $this->client->loginUser($this->userAdmin);
-        $this->client->request('GET', '/users/list');
-        $this->client->submitForm('delete-user'.$userToDeleteId);
-        $this->client->followRedirect();
-        $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! L'utilisateur a bien été supprimé");
-        $this->assertNull($this->userRepository->find($userToDeleteId));
 
     }
 
