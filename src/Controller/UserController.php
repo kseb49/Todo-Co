@@ -37,7 +37,7 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $datas = $cache->get(
             'user_list',
-            function (ItemInterface $item) use($users) {
+            function (ItemInterface $item) use ($users) {
                 $item->expiresAfter(3600);
                 $item->tag('user_list');
                 return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
@@ -110,6 +110,7 @@ class UserController extends AbstractController
                 $this->addFlash('success', "Modification réussie");
                 return $this->redirectToRoute('homepage');
             }
+
             $entityManager->refresh($user);
         }
 
@@ -180,7 +181,7 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditPasswordForm::class, $user);
         $form->handleRequest($request);
-        if ($form->isSubmitted() === true ) {
+        if ($form->isSubmitted() === true) {
             if ($form->isValid() === true) {
                 $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
                 $entityManager->persist($user);
