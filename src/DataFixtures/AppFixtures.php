@@ -23,6 +23,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
     public static function getGroups(): array
     {
         return ['dev'];
+
     }
 
 
@@ -65,9 +66,10 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $manager->persist($superUser);
         $manager->flush();
 
+        // Create 100 tasks.
         $users = $manager->getRepository(User::class)->findAll();
         $faker = Factory::create('fr_FR');
-        for ($i =0; $i < 100; $i++) {
+        for ($i = 0; $i < 100; $i++) {
             $task = new Task();
             $task->setTitle('Tache n°'.$i);
             $task->setContent($faker->text(35));

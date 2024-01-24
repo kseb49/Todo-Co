@@ -35,12 +35,13 @@ class UserController extends AbstractController
     public function list(UserRepository $users, TagAwareCacheInterface $cache): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-        $datas = $cache->get('user_list', function(ItemInterface $item) use($users)
-            {
+        $datas = $cache->get(
+            'user_list',
+            function (ItemInterface $item) use($users) {
                 $item->expiresAfter(3600);
                 $item->tag('user_list');
                 return $this->render('user/list.html.twig', ['users' => $users->findAll()]);
-            }
+            },
         );
         return $datas;
 
@@ -62,6 +63,7 @@ class UserController extends AbstractController
         if ($this->getUser() !== null) {
             $this->denyAccessUnlessGranted('ROLE_ADMIN');
         }
+
         $user = new User();
         $form = $this->createForm(UserForm::class, $user);
         $form->handleRequest($request);
@@ -100,7 +102,7 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('edit', $user, message:"Edition");
         $form = $this->createForm(EditUserForm::class, $user);
         $form->handleRequest($request);
-        if ($form->isSubmitted() === true ) {
+        if ($form->isSubmitted() === true) {
             if ($form->isValid() === true) {
                 $entityManager->persist($user);
                 $entityManager->flush();

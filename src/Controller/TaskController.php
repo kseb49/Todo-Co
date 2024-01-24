@@ -33,8 +33,9 @@ class TaskController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
         $user = $userRepo->findOneBy(['email' => $this->getUser()->getUserIdentifier()]);
         $key = preg_replace('#@.#','',$this->getUser()->getUserIdentifier());
-        $datas = $cache->get('task_list_'.$key, function(ItemInterface $item) use($task, $user)
-            {
+        $datas = $cache->get(
+            'task_list_'.$key,
+            function (ItemInterface $item) use($task, $user) {
                 $item->expiresAfter(3600);
                 $user_tasks = $task->findBy(['user' => $user]);
                 $ment = $user->getMentionned();
@@ -44,16 +45,19 @@ class TaskController extends AbstractController
                         array_push($tasks_ids, $value->getId());
                     }
                     $tasks = $task->findExcept($user->getId(), $tasks_ids);
-                }
-                else {
+                }else {
                     $tasks = $task->findExcept($user->getId());
                 }
                 $item->tag('task_list');
                 return $this->render(
                     'task/list.html.twig',
-                    ['tasks' =>  $tasks, 'user_tasks' => $user_tasks, 'refs' => $ment],
+                    [
+                     'tasks' => $tasks,
+                     'user_tasks' => $user_tasks,
+                     'refs' => $ment
+                    ],
                 );
-            }
+            },
         );
         return $datas;
 

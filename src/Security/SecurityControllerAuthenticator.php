@@ -29,6 +29,7 @@ class SecurityControllerAuthenticator extends AbstractLoginFormAuthenticator
 
     }
 
+
     #[CodeCoverageIgnore]
     public function authenticate(Request $request): Passport
     {

@@ -141,7 +141,6 @@ class TaskControllerTest extends WebTestCase
      */
     public function testToggleState()
     {
-        // for ($i =0; $i < 2 ; $i++) {
         $this->client->loginUser($this->userAdmin);
         $this->client->request('GET', '/tasks');
         $task = $this->taskRepository->findOneBy(['user' => $this->userAdmin]);
@@ -157,8 +156,6 @@ class TaskControllerTest extends WebTestCase
         $this->client->submitForm('toggle'.$task->getId());
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', $text);
-        // $this->assertSelectorExists('div.alert.alert-success');
-            // }
 
     }
 
@@ -266,9 +263,10 @@ class TaskControllerTest extends WebTestCase
         $this->assertSame('Créer une tâche', $link);
         $this->assertNotEmpty($this->userAdmin->getMentionned());
         $title = '';
-        foreach ($this->userAdmin->getMentionned() as $key => $value) {
-           $title .= $value->getTitle();
+        foreach ($this->userAdmin->getMentionned() as $value) {
+            $title .= $value->getTitle();
         }
+
         $this->assertAnySelectorTextContains('h4', $title);
         $this->assertPageTitleContains('Liste des tâches');
 
@@ -299,7 +297,7 @@ class TaskControllerTest extends WebTestCase
                 [
                     sprintf('%s[title]', $form->getName()) => "Edited title",
                     sprintf('%s[content]', $form->getName()) => "edited content",
-                    ]
+                ]
                 );
         $this->client->followRedirect();
         $this->assertSelectorTextContains('div.alert.alert-success', "Superbe ! La tâche a bien été modifiée.");
