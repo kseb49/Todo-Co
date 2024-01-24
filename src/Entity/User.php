@@ -67,7 +67,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $task;
 
     #[ORM\ManyToMany(targetEntity: Task::class, mappedBy: 'referer')]
-    private Collection $mentionned;
+    private ?Collection $mentionned = null;
 
 
     public function __construct()
@@ -90,7 +90,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
-    public function setEmail(string $email): static
+    public function setEmail(?string $email): static
     {
         $this->email = $email;
 
@@ -133,16 +133,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }
 
 
-    public function setPassword(string $password): static
+    public function setPassword(?string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
@@ -164,7 +163,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
-    public function setUsername(string $username): static
+    public function setUsername(?string $username): static
     {
         $this->username = $username;
         return $this;

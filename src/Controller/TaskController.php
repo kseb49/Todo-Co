@@ -3,14 +3,17 @@
 namespace App\Controller;
 
 use App\Entity\Task;
-use App\Repository\TaskRepository;
 use App\Form\TaskForm;
+use App\Repository\TaskRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TaskController extends AbstractController
 {
@@ -21,16 +24,43 @@ class TaskController extends AbstractController
      * Display the tasks list page
      *
      * @param TaskRepository $task
+     * @param TagAwareCacheInterface $cache
+     * @param UserRepository $userRepo
      * @return Response
      */
-    public function list(TaskRepository $task): Response
+    public function list(TaskRepository $task, TagAwareCacheInterface $cache, UserRepository $userRepo): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $tasks = $task->findAll();
-        return $this->render(
-            'task/list.html.twig',
-            ['tasks' => $tasks],
+        $user = $userRepo->findOneBy(['email' => $this->getUser()->getUserIdentifier()]);
+        $key = preg_replace('#@.#','',$this->getUser()->getUserIdentifier());
+        $datas = $cache->get(
+            'task_list_'.$key,
+            function (ItemInterface $item) use ($task, $user) {
+                $item->expiresAfter(3600);
+                $user_tasks = $task->findBy(['user' => $user]);
+                $ment = $user->getMentionned();
+                if (count($ment) !== 0) {
+                    $tasks_ids = [];
+                    foreach ($ment as $value) {
+                        array_push($tasks_ids, $value->getId());
+                    }
+
+                    $tasks = $task->findExcept($user->getId(), $tasks_ids);
+                } else {
+                    $tasks = $task->findExcept($user->getId());
+                }
+                $item->tag('task_list');
+                return $this->render(
+                    'task/list.html.twig',
+                    [
+                     'tasks'      => $tasks,
+                     'user_tasks' => $user_tasks,
+                     'refs'       => $ment
+                    ],
+                );
+            },
         );
+        return $datas;
 
     }
 
@@ -41,9 +71,10 @@ class TaskController extends AbstractController
      *
      * @param Request $request
      * @param EntityManagerInterface $entityManager
+     * @param TagAwareCacheInterface $cache
      * @return Response
      */
-    public function create(Request $request, EntityManagerInterface $entityManager): Response
+    public function create(Request $request, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         $task = new Task();
@@ -53,6 +84,7 @@ class TaskController extends AbstractController
             $task->setUser($this->getUser());
             $entityManager->persist($task);
             $entityManager->flush();
+            $cache->invalidateTags(['task_list']);
             $this->addFlash('success', 'La tâche a été bien été ajoutée.');
             return $this->redirectToRoute('task_list');
         }
@@ -72,15 +104,17 @@ class TaskController extends AbstractController
      * @param Task $task
      * @param Request $request
      * @param EntityManagerInterface $entityManager
+     * @param TagAwareCacheInterface $cache
      * @return Response
      */
-    public function edit(Task $task, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(Task $task, Request $request, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): Response
     {
         $this->denyAccessUnlessGranted('edit', $task, "Vous ne pouvez pas éditer cette tâche");
         $form = $this->createForm(TaskForm::class, $task);
         $form->handleRequest($request);
         if ($form->isSubmitted() === true && $form->isValid() === true) {
             $entityManager->flush();
+            $cache->invalidateTags(['task_list']);
             $this->addFlash('success', 'La tâche a bien été modifiée.');
             return $this->redirectToRoute('task_list');
         }
@@ -102,12 +136,14 @@ class TaskController extends AbstractController
      *
      * @param Task $task
      * @param EntityManagerInterface $entityManager
+     * @param TagAwareCacheInterface $cache
      * @return RedirectResponse
      */
-    public function toggle(Task $task, EntityManagerInterface $entityManager, Request $request): RedirectResponse
+    public function toggle(Task $task, EntityManagerInterface $entityManager, Request $request, TagAwareCacheInterface $cache): RedirectResponse
     {
         $this->denyAccessUnlessGranted('toggle', $task, "Seul le créateur de la tâche peut en changer son état");
         $submittedToken = $request->request->get('token');
+        $cache->invalidateTags(['task_list']);
         if ($this->isCsrfTokenValid('toggle-state', $submittedToken) === true) {
             $task->toggle(!$task->isDone());
             $entityManager->flush();
@@ -129,12 +165,14 @@ class TaskController extends AbstractController
      * @param Task $task
      * @param EntityManagerInterface $entityManager
      * @param Request $request
+     * @param TagAwareCacheInterface $cache
      * @return RedirectResponse
      */
-    public function deleteTask(Task $task, EntityManagerInterface $entityManager, Request $request): RedirectResponse
+    public function deleteTask(Task $task, EntityManagerInterface $entityManager, Request $request, TagAwareCacheInterface $cache): RedirectResponse
     {
         $this->denyAccessUnlessGranted('delete', $task, "Vous ne pouvez pas supprimer la tâche d'un autre utilisateur");
         $submittedToken = $request->request->get('token');
+        $cache->invalidateTags(['task_list']);
         if ($this->isCsrfTokenValid('delete-task', $submittedToken) === true) {
             $entityManager->remove($task);
             $entityManager->flush();

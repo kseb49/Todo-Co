@@ -10,6 +10,11 @@ class HomeController extends AbstractController
 
 
     #[Route('/', name:"homepage")]
+    /**
+     * Display the homepage
+     *
+     * @return void
+     */
     public function index()
     {
         return $this->render('default/index.html.twig');

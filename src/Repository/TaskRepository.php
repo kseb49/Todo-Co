@@ -26,12 +26,29 @@ class TaskRepository extends ServiceEntityRepository
     }
 
 
-    public function findByUsers($id)
+    /**
+     * Retrieve all the tasks except those which match the ids
+     *
+     * @param string $user_id   Tasks of the user will be excluded
+     * @param array  $tasks_ids Tasks in wich the user is mentionned will be excluded
+     * @return array
+     */
+    public function findExcept(string $user_id, array|null $tasks_ids= null):array
     {
+        if ($tasks_ids !== null) {
+            return $this->createQueryBuilder('t')
+                ->andWhere('t.user != :val')
+                ->setParameter('val', $user_id)
+                ->andWhere('t.id NOT IN (:tasks)')
+                ->setParameter('tasks', $tasks_ids)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
+
         return $this->createQueryBuilder('t')
-            ->andWhere('t.user = :val')
-            ->setParameter('val', $id)
-            ->orderBy('t.id', 'ASC')
+            ->andWhere('t.user != :val')
+            ->setParameter('val', $user_id)
             ->getQuery()
             ->getResult()
         ;

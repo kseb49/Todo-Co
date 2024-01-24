@@ -15,6 +15,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
 
 class SecurityControllerAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -29,6 +30,7 @@ class SecurityControllerAuthenticator extends AbstractLoginFormAuthenticator
     }
 
 
+    #[CodeCoverageIgnore]
     public function authenticate(Request $request): Passport
     {
         $email = $request->request->get('email', '');
@@ -46,7 +48,7 @@ class SecurityControllerAuthenticator extends AbstractLoginFormAuthenticator
 
     }
 
-
+    #[CodeCoverageIgnore]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
