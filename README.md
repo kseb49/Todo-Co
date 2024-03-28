@@ -44,7 +44,7 @@ APP_SECRET=!new32characterskey!
 
 Charger les données initiales
 
-```symfony console doctrine:fixtures:load```
+```symfony console doctrine:fixtures:load --group=dev```
 
 ## Tests
 Le code  est couvert par des tests unitaires et fonctionnels implémentés avec [PHPUnit](https://docs.phpunit.de/en/10.5/index.html).
