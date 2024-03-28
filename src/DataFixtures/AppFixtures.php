@@ -52,7 +52,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         // Anonymous user.
         $anonymousUser = new User;
         $anonymousUser->setEmail('fake@anonyme.com');
-        $anonymousUser->setRoles(['ROLE_USER']);
+        $anonymousUser->setRoles(['ROLE_SUPER_ADMIN']);
         $anonymousUser->setUsername('anonyme');
         $anonymousUser->setPassword($this->passwordHasher->hashPassword($user, '123456'));
         $manager->persist($anonymousUser);

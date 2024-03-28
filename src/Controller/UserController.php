@@ -35,8 +35,9 @@ class UserController extends AbstractController
     public function list(UserRepository $users, TagAwareCacheInterface $cache): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $key = preg_replace('#@.#','',$this->getUser()->getUserIdentifier());
         $datas = $cache->get(
-            'user_list',
+            'user_list'.$key,
             function (ItemInterface $item) use ($users) {
                 $item->expiresAfter(3600);
                 $item->tag('user_list');
@@ -107,6 +108,7 @@ class UserController extends AbstractController
                 $entityManager->persist($user);
                 $entityManager->flush();
                 $cache->invalidateTags(['user_list']);
+                $cache->invalidateTags(['task_list']);
                 $this->addFlash('success', "Modification réussie");
                 return $this->redirectToRoute('homepage');
             }
